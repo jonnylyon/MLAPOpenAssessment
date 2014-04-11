@@ -1,52 +1,19 @@
 from __future__ import division
 
-import numpy as np
-from numpy import matrix, sqrt, mean, concatenate, ndarray, dot, sum, transpose, std, exp, reshape, nditer, multiply
-
-import scipy as sp
-from scipy.optimize import fmin_bfgs
-
-from random import shuffle, randint
-from datetime import datetime
-from copy import deepcopy
-from math import log
-from sys import float_info
-
 import csv
+
+import numpy as np
+import scipy as sp
+
+from generics import FeatureExpander, append_features, split_data, normalise, write_to_file
+from datetime import datetime
+from numpy import matrix, reshape, multiply, dot, nditer
+from sys import float_info
+from math import exp, log
+from scipy.optimize import fmin_bfgs
 
 fp_out = r'C:\Users\Jonny\Documents\York\CS\Year 3\MLAP\Open assessment\MLAPOpenAssessment\stock_price_mod.csv'
 fp = r'C:\Users\Jonny\Documents\York\CS\Year 3\MLAP\Open assessment\MLAPOpenAssessment\stock_price.csv'
-
-class FeatureExpander:
-	def __init__(self, data):
-		self.data = data
-		
-	def get_random_inclusion_list(self, feature_count):
-		inclusion_list = []
-		
-		for i in range(feature_count):
-			inclusion_list.append(randint(0,2))
-			
-		return inclusion_list
-		
-	def append_feature_expansions(self, data, inclusion_list):
-		for i in range(len(data)):
-			expanded = []
-			
-			expanded.append(1)
-			
-			for j in range(len(inclusion_list)):
-				for k in range(1, inclusion_list[j] + 1):
-					expanded.append(data[i][3][j] ** k)
-			
-			data[i].append(matrix(expanded))
-		
-		return data
-	
-	def expand_features(self, inclusion_list):			
-		expanded = self.append_feature_expansions(deepcopy(self.data), inclusion_list)
-		
-		return expanded
 
 def append_classifications(source_data):
 	result_data=[]
@@ -57,55 +24,6 @@ def append_classifications(source_data):
 		this_row.append(classify(last_row[1], this_row[1]))
 		result_data.append(this_row)
 	
-	return result_data
-
-def append_features(source_data):
-	result_data=[]
-	
-	for i in range(10, len(source_data)):
-		# add feature matrix in next column
-		this_row = source_data[i]
-		feature_list = []
-		
-		prev_10_sv = [row[0] for row in source_data[i-10:i]]
-		prev_10_sp = [row[1] for row in source_data[i-10:i]]
-		
-		# # last change in sv
-		# feature_list.append(prev_10_sv[9] - prev_10_sv[8])
-		
-		# # mean of prev 10 rows sv
-		# feature_list.append(mean(prev_10_sv))
-		
-		# # std dev of prev 10 rows sv
-		# feature_list.append(std(prev_10_sv))
-		
-		# # last sv
-		# feature_list.append(prev_10_sv[9])
-		
-		# # last change in sp
-		# feature_list.append(prev_10_sp[9] - prev_10_sp[8])
-		
-		# # mean of prev 10 rows sp
-		# feature_list.append(mean(prev_10_sp))
-		
-		# # std dev of prev 10 rows sp
-		# feature_list.append(std(prev_10_sp))
-		
-		# # last sp
-		# feature_list.append(prev_10_sp[9])
-		
-		feature_list.append(prev_10_sp[9])
-		feature_list.append(prev_10_sp[9] - prev_10_sp[0])
-		feature_list.append(prev_10_sp[9] - prev_10_sp[8])
-		feature_list.append(prev_10_sp[9] - prev_10_sp[0])
-		feature_list.append(std(prev_10_sp))
-		feature_list.append(sum([prev_10_sp[j] * prev_10_sv[j] for j in range(10)]))
-		feature_list.append(mean(prev_10_sp))
-		feature_list.append(mean(prev_10_sv))
-
-		this_row.append(feature_list)
-		result_data.append(this_row)
-
 	return result_data
 	
 def unflatten_theta(THETA):
@@ -202,11 +120,6 @@ def regression(data):
 	
 	return fmin_bfgs(neg_log_likelihood, initial_THETA, fprime=gradient, args=[data])
 
-def split_data(all_data):
-	shuffle(all_data)
-	split = int(len(all_data)/2)
-	return [all_data[:split], all_data[split:]]
-
 def hard_predict(THETA, X):
 	best_i = -1
 	p_best = -1
@@ -237,43 +150,14 @@ def evaluate(data_CV1, data_CV2, THETA_CV1, THETA_CV2):
 	pc_CV1 = percentage_correct_classifications(unflatten_theta(THETA_CV2), data_CV1)
 	pc_CV2 = percentage_correct_classifications(unflatten_theta(THETA_CV1), data_CV2)
 	
-	return [(pc_CV1 + pc_CV2) / 2]
-	
-def normalise(data):
-	all_sv = [row[0] for row in data]
-	all_sp = [row[1] for row in data]
-	
-	sv_std = std(all_sv)
-	sv_mean = mean(all_sv)
-	
-	sp_std = std(all_sp)
-	sp_mean = mean(all_sp)
-	
-	for row in data:
-		row[0] = (row[0] - sv_mean) / sv_std
-		row[1] = (row[1] - sp_mean) / sp_std
-	
-	return data
-
-def write_to_file(data):
 	lines = []
-	for row in data:
-		cells = []
-		for item in row:
-			cells.append(str(item))
-	
-		line = ",".join(cells)
-		lines.append(line + "\n")
-		
-	file = open(fp_out, 'w')
-	file.writelines(lines)
-	file.close()	
-		
+	return (pc_CV1 + pc_CV2) / 2
+			
 def logistic(InputFileName):	
 	raw_data = [[float(item) for item in row] for row in csv.reader(open(InputFileName, "rb"))]
 	
-	#all_normalised_data = normalise(raw_data)
-	all_normalised_data = raw_data
+	all_normalised_data = normalise(raw_data)
+	#all_normalised_data = raw_data
 	all_normalised_data = append_classifications(all_normalised_data)
 	training_data = append_features(all_normalised_data)
 	expander = FeatureExpander(training_data)
@@ -290,7 +174,7 @@ def logistic(InputFileName):
 	
 	expanded = expander.expand_features(inclusion_list)
 	
-	write_to_file(expanded)
+	write_to_file(expanded, fp_out)
 	
 	[expanded_CV1, expanded_CV2] = split_data(expanded)
 	
