@@ -14,9 +14,8 @@ fp_out = r'C:\Users\Jonny\Documents\York\CS\Year 3\MLAP\Open assessment\MLAPOpen
 fp = r'C:\Users\Jonny\Documents\York\CS\Year 3\MLAP\Open assessment\MLAPOpenAssessment\stock_price.csv'
 
 class FeatureExpander:
-	def __init__(self, data_CV1, data_CV2):
-		self.data_CV1 = data_CV1
-		self.data_CV2 = data_CV2
+	def __init__(self, data):
+		self.data = data
 		
 	def get_random_inclusion_list(self, feature_count):
 		inclusion_list = []
@@ -32,8 +31,6 @@ class FeatureExpander:
 			
 			expanded.append(1)
 			
-			#print data[i]
-			#raise Exception()
 			for j in range(len(inclusion_list)):
 				for k in range(1, inclusion_list[j] + 1):
 					expanded.append(data[i][2][j] ** k)
@@ -43,10 +40,9 @@ class FeatureExpander:
 		return data
 	
 	def expand_features(self, inclusion_list):			
-		expanded_CV1 = self.append_feature_expansions(deepcopy(self.data_CV1), inclusion_list)
-		expanded_CV2 = self.append_feature_expansions(deepcopy(self.data_CV2), inclusion_list)
+		expanded = self.append_feature_expansions(deepcopy(self.data), inclusion_list)
 		
-		return [expanded_CV1, expanded_CV2]
+		return expanded
 
 def append_features(source_data):
 	result_data=[]
@@ -118,9 +114,6 @@ def gradient(THETA, data):
 		for j in range(len(THETA)):
 			GRAD[j] += error * X_i[0,j]
 	
-	#for i in range(len(GRAD)):
-	#	GRAD[i] = GRAD[i] / len(data)
-	
 	return sp.array(GRAD)
 
 def regression(data):
@@ -157,24 +150,14 @@ def normalise(data):
 	for row in data:
 		row[0] = (row[0] - sv_mean) / sv_std
 		row[1] = (row[1] - sp_mean) / sp_std
-		
-	all_sv = matrix([row[0] for row in data])
 	
 	return data
 	
-def write_polynomials_to_file(data1, data2):
+def write_to_file(data):
 	lines = []
-	for row in data1:
-		cells = [str(row[0]), str(row[1])]
-		for item in row[3].A1:
-			cells.append(str(item))
-	
-		line = ",".join(cells)
-		lines.append(line + "\n")
-		
-	for row in data2:
-		cells = [str(row[0]), str(row[1])]
-		for item in row[3].A1:
+	for row in data:
+		cells = []
+		for item in row:
 			cells.append(str(item))
 	
 		line = ",".join(cells)
@@ -190,14 +173,12 @@ def linear(InputFileName):
 	all_normalised_data = normalise(raw_data)
 	#all_normalised_data = raw_data
 	
-	training_data = append_features(raw_data)[10:]
-	
-	[data_CV1, data_CV2] = split_data(training_data)
-	
-	expander = FeatureExpander(data_CV1, data_CV2)
+	training_data = append_features(all_normalised_data)
+		
+	expander = FeatureExpander(training_data)
 	
 	inclusion_list = []
-	inclusion_list.append(1) # last change in sv NOTE ALL THESE COMMENTS ARE WRONG...
+	inclusion_list.append(0) # last change in sv
 	inclusion_list.append(0) # mean of prev 10 rows sv
 	inclusion_list.append(0) # std dev of prev 10 rows sv
 	inclusion_list.append(0) # last sv
@@ -206,16 +187,22 @@ def linear(InputFileName):
 	inclusion_list.append(0) # std dev of prev 10 rows sp
 	inclusion_list.append(0) # last sp
 	
-	[expanded_CV1, expanded_CV2] = expander.expand_features(inclusion_list)
+	expanded = expander.expand_features(inclusion_list)
 	
-	write_polynomials_to_file(expanded_CV1, expanded_CV2)
+	write_to_file(expanded)
+	
+	[expanded_CV1, expanded_CV2] = split_data(expanded)
 	
 	THETA_CV1 = regression(expanded_CV1)
 	THETA_CV2 = regression(expanded_CV2)
 	
-	print evaluate_MSE(expanded_CV1,expanded_CV2,THETA_CV1,THETA_CV2)
+	result = evaluate_MSE(expanded_CV1,expanded_CV2,THETA_CV1,THETA_CV2)
+	
+	print result
 	print THETA_CV1
 	print THETA_CV2
+	
+	return result
 
 print datetime.now()
 linear(fp)
