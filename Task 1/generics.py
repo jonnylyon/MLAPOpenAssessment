@@ -23,7 +23,7 @@ class FeatureExpander:
 			
 			for j in range(len(inclusion_list)):
 				for k in range(1, inclusion_list[j] + 1):
-					expanded.append(data[i][len(data[i])-1][j] ** k)
+					expanded.append(data[i][-1][j] ** k)
 			
 			data[i].append(matrix(expanded))
 		

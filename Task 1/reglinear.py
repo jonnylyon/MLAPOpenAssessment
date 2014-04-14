@@ -51,7 +51,7 @@ def regression(data):
 	
 	return fmin_bfgs(total_squared_loss, initial_THETA, fprime=gradient, args=[data])
 
-def evaluate(data_CV1, data_CV2, THETA_CV1, THETA_CV2):
+def evaluate_MSE(data_CV1, data_CV2, THETA_CV1, THETA_CV2):
 	squared_losses_CV1 = generate_squared_losses(THETA_CV2, data_CV1)
 	squared_losses_CV2 = generate_squared_losses(THETA_CV1, data_CV2)
 	
@@ -89,7 +89,7 @@ def linear(InputFileName):
 	THETA_CV1 = regression(expanded_CV1)
 	THETA_CV2 = regression(expanded_CV2)
 	
-	result = evaluate(expanded_CV1,expanded_CV2,THETA_CV1,THETA_CV2)
+	result = evaluate_MSE(expanded_CV1,expanded_CV2,THETA_CV1,THETA_CV2)
 	
 	print THETA_CV1
 	print THETA_CV2

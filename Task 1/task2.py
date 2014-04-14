@@ -1,6 +1,7 @@
 from __future__ import division
 
 import csv
+import os
 
 import numpy as np
 import scipy as sp
@@ -12,8 +13,8 @@ from sys import float_info
 from math import exp, log
 from scipy.optimize import fmin_bfgs
 
-fp_out = r'C:\Users\Jonny\Documents\York\CS\Year 3\MLAP\Open assessment\MLAPOpenAssessment\stock_price_mod.csv'
-fp = r'C:\Users\Jonny\Documents\York\CS\Year 3\MLAP\Open assessment\MLAPOpenAssessment\stock_price.csv'
+fp = os.path.join(os.path.dirname(__file__), 'stock_price.csv')
+fp_out = os.path.join(os.path.dirname(__file__), 'stock_price_mod.csv')
 
 def append_classifications(source_data):
 	result_data=[]
@@ -150,10 +151,9 @@ def evaluate(data_CV1, data_CV2, THETA_CV1, THETA_CV2):
 	pc_CV1 = percentage_correct_classifications(unflatten_theta(THETA_CV2), data_CV1)
 	pc_CV2 = percentage_correct_classifications(unflatten_theta(THETA_CV1), data_CV2)
 	
-	lines = []
 	return (pc_CV1 + pc_CV2) / 2
 			
-def logistic(InputFileName):	
+def logistic(InputFileName):
 	raw_data = [[float(item) for item in row] for row in csv.reader(open(InputFileName, "rb"))]
 	
 	all_normalised_data = normalise(raw_data)
@@ -185,6 +185,7 @@ def logistic(InputFileName):
 	print THETA_CV2
 	return evaluate(expanded_CV1,expanded_CV2,THETA_CV1,THETA_CV2)
 
-print datetime.now()
-print logistic(fp)
-print datetime.now()
+if __name__ == "__main__":
+	print datetime.now()
+	print logistic(fp)
+	print datetime.now()
