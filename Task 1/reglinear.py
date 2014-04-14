@@ -5,7 +5,7 @@ import scipy as sp
 
 from generics import FeatureExpander, append_features, split_data, normalise, write_to_file, load_data
 from datetime import datetime
-from numpy import matrix, dot, ndarray
+from numpy import matrix, dot, ndarray, nditer, transpose
 from scipy.optimize import fmin_bfgs
 
 fp = os.path.join(os.path.dirname(__file__), 'stock_price.csv')
@@ -21,40 +21,51 @@ def generate_squared_losses(THETA, data):
 	
 def total_squared_loss(THETA, data):
 	return sum(generate_squared_losses(THETA, data))
-
-def gradient(THETA, data):
-	GRAD = []
 	
-	for i in range(len(THETA)):
-		GRAD.append(0.0)
+def reg_loss_lasso(THETA, data, lamb, sign_func = None):
+	complexity = 0
 	
-	for i in range(len(data)):
-		X_i = data[i][3]
-		sp_computed = dot(X_i, THETA)
-		sp_actual = data[i][1]
-		
-		error = (sp_computed - sp_actual)[0,0]
-
-		for j in range(len(THETA)):
-			GRAD[j] += error * X_i[0,j]
+	for theta in nditer(THETA):
+		complexity += abs(theta)
 	
-	return sp.array(GRAD)
+	return (lamb * total_squared_loss(THETA, data)) + ((1 - lamb) * complexity)
 
-def regression(data):
-	length_of_expansion = data[0][3].shape[1]
+def sign(THETA):
+	#return divide(m,abs(m)) # doesn't handle zeros well (divide-by-zero)
+
+	out = [0 if theta == 0 else theta / abs(theta) for theta in nditer(THETA)]
+	return transpose(matrix(out))
+
+def gradient_lasso(THETA, data, lamb, sign_func):
+	# This THETA_0 business is necessary because fmin_bfgs flattens THETA into
+	# an array which is useless for us
+	THETA_0 = []
+	for elem in nditer(THETA):
+		THETA_0.append(float(elem))
+	THETA_0 = transpose(matrix(THETA_0))
+	
+	X_matrix = matrix([[float(elem) for elem in nditer(row_matrix)] for row_matrix in [row[-1] for row in data]])
+	y_matrix = transpose(matrix([row[1] for row in data]))
+	
+	first_part = -2 * lamb * dot(transpose(X_matrix), y_matrix - dot(X_matrix, THETA_0))
+	second_part = ((1 - lamb) * sign_func(THETA_0))
+	
+	grad_matrix = first_part + second_part
+	
+	return sp.array(grad_matrix.A1)
+
+def regression(data, lamb):
+	length_of_expansion = data[0][-1].shape[1]
 	
 	initial_THETA = matrix(np.zeros([length_of_expansion,1]))
 	
-	return fmin_bfgs(total_squared_loss, initial_THETA, fprime=gradient, args=[data])
+	return fmin_bfgs(reg_loss_lasso, initial_THETA, fprime=gradient_lasso, args=[data,lamb,sign])
 
-def evaluate_MSE(data_CV1, data_CV2, THETA_CV1, THETA_CV2):
-	squared_losses_CV1 = generate_squared_losses(THETA_CV2, data_CV1)
-	squared_losses_CV2 = generate_squared_losses(THETA_CV1, data_CV2)
-	
-	total_squared_loss = sum(squared_losses_CV1) + sum(squared_losses_CV2)
-	data_quantity = len(squared_losses_CV1) + len(squared_losses_CV2)
-	
-	return total_squared_loss / data_quantity
+def evaluate(data_CV1, data_CV2, THETA_CV1, THETA_CV2, lamb):
+	loss_CV1 = reg_loss_lasso(THETA_CV2, data_CV1, lamb)
+	loss_CV2 = reg_loss_lasso(THETA_CV1, data_CV2, lamb)
+
+	return (loss_CV1 + loss_CV2) / 2
 		
 def linear(InputFileName):
 	raw_data = load_data(InputFileName)
@@ -67,10 +78,10 @@ def linear(InputFileName):
 	expander = FeatureExpander(training_data)
 	
 	inclusion_list = []
-	inclusion_list.append(0) # last change in sv
+	inclusion_list.append(1) # last change in sv
 	inclusion_list.append(0) # mean of prev 10 rows sv
 	inclusion_list.append(0) # std dev of prev 10 rows sv
-	inclusion_list.append(0) # last sv
+	inclusion_list.append(4) # last sv
 	inclusion_list.append(0) # last change in sp
 	inclusion_list.append(0) # mean of prev 10 rows sp
 	inclusion_list.append(0) # std dev of prev 10 rows sp
@@ -82,15 +93,20 @@ def linear(InputFileName):
 	
 	[expanded_CV1, expanded_CV2] = split_data(expanded)
 	
-	THETA_CV1 = regression(expanded_CV1)
-	THETA_CV2 = regression(expanded_CV2)
+	results = []
+	for i in range(11):
+		lamb = i * 0.1
+		THETA_CV1 = regression(expanded_CV1, lamb)
+		THETA_CV2 = regression(expanded_CV2, lamb)
+		
+		results.append(evaluate(expanded_CV1,expanded_CV2,THETA_CV1,THETA_CV2,lamb))
 	
-	result = evaluate_MSE(expanded_CV1,expanded_CV2,THETA_CV1,THETA_CV2)
+	for result in results:
+		print result
 	
-	print THETA_CV1
-	print THETA_CV2
+	best_result = min(results)
 	
-	return result
+	return best_result
 	
 if __name__ == "__main__":
 	print datetime.now()
