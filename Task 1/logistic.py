@@ -1,12 +1,11 @@
 from __future__ import division
 
-import csv
 import os
 
 import numpy as np
 import scipy as sp
 
-from generics import FeatureExpander, append_features, split_data, normalise, write_to_file
+from generics import FeatureExpander, append_features, split_data, normalise, write_to_file, load_data
 from datetime import datetime
 from numpy import matrix, reshape, multiply, dot, nditer
 from sys import float_info
@@ -154,7 +153,7 @@ def evaluate(data_CV1, data_CV2, THETA_CV1, THETA_CV2):
 	return (pc_CV1 + pc_CV2) / 2
 			
 def logistic(InputFileName):
-	raw_data = [[float(item) for item in row] for row in csv.reader(open(InputFileName, "rb"))]
+	raw_data = load_data(InputFileName)
 	
 	all_normalised_data = normalise(raw_data)
 	#all_normalised_data = raw_data

@@ -1,10 +1,9 @@
-import csv
 import os
 
 import numpy as np
 import scipy as sp
 
-from generics import FeatureExpander, append_features, split_data, normalise, write_to_file
+from generics import FeatureExpander, append_features, split_data, normalise, write_to_file, load_data
 from datetime import datetime
 from numpy import matrix, dot, ndarray
 from scipy.optimize import fmin_bfgs
@@ -61,7 +60,7 @@ def evaluate_MSE(data_CV1, data_CV2, THETA_CV1, THETA_CV2):
 	return total_squared_loss / data_quantity
 		
 def linear(InputFileName):
-	raw_data = [[float(item) for item in row] for row in csv.reader(open(InputFileName, "rb"))]
+	raw_data = load_data(InputFileName)
 	
 	all_normalised_data = normalise(raw_data)
 	#all_normalised_data = raw_data

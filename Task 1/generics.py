@@ -3,6 +3,8 @@ from numpy import matrix, mean, sum, std
 from random import shuffle, randint
 from copy import deepcopy
 
+import csv
+
 class FeatureExpander:
 	def __init__(self, data):
 		self.data = data
@@ -116,4 +118,7 @@ def write_to_file(data, filepath):
 		
 	file = open(filepath, 'w')
 	file.writelines(lines)
-	file.close()	
+	file.close()
+
+def load_data(filepath):
+	return [[float(item) for item in row] for row in csv.reader(open(filepath, "rb"))]
