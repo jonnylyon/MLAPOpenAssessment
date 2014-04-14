@@ -21,9 +21,6 @@ def generate_squared_losses(THETA, data):
 	
 def total_squared_loss(THETA, data):
 	return sum(generate_squared_losses(THETA, data))
-	
-def mean_squared_loss(THETA, data):
-	return total_squared_loss(THETA, data) / len(data)
 
 def gradient(THETA, data):
 	GRAD = []
