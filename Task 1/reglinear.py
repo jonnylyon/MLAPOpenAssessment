@@ -3,7 +3,7 @@ import os
 import numpy as np
 import scipy as sp
 
-from generics import FeatureExpander, append_features, split_data, normalise, write_to_file, load_data
+from generics import FeatureExpander, append_features, split_data, normalise, write_to_file, load_data, sign
 from datetime import datetime
 from numpy import matrix, dot, ndarray, nditer, transpose
 from scipy.optimize import fmin_bfgs
@@ -29,12 +29,6 @@ def reg_loss_lasso(THETA, data, lamb, sign_func = None):
 		complexity += abs(theta)
 	
 	return (lamb * total_squared_loss(THETA, data)) + ((1 - lamb) * complexity)
-
-def sign(THETA):
-	#return divide(m,abs(m)) # doesn't handle zeros well (divide-by-zero)
-
-	out = [0 if theta == 0 else theta / abs(theta) for theta in nditer(THETA)]
-	return transpose(matrix(out))
 
 def gradient_lasso(THETA, data, lamb, sign_func):
 	# This THETA_0 business is necessary because fmin_bfgs flattens THETA into

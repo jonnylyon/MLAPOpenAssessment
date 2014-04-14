@@ -1,4 +1,5 @@
-from numpy import matrix, mean, sum, std
+import numpy as np
+from numpy import matrix, mean, sum, std, nditer, transpose
 
 from random import shuffle, randint
 from copy import deepcopy
@@ -105,6 +106,13 @@ def normalise(data):
 		row[1] = (row[1] - sp_mean) / sp_std
 	
 	return data
+
+def sign(THETA):
+	shape = THETA.shape
+	out = [0 if theta == 0 else theta / abs(theta) for theta in nditer(THETA)]
+	out = matrix(out)
+	out = np.reshape(out, shape)
+	return out
 
 def write_to_file(data, filepath):
 	lines = []

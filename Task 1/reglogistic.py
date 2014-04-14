@@ -5,9 +5,9 @@ import os
 import numpy as np
 import scipy as sp
 
-from generics import FeatureExpander, append_features, split_data, normalise, write_to_file, load_data
+from generics import FeatureExpander, append_features, split_data, normalise, write_to_file, load_data, sign
 from datetime import datetime
-from numpy import matrix, reshape, multiply, dot, nditer
+from numpy import matrix, reshape, multiply, dot, nditer, transpose
 from sys import float_info
 from math import exp, log
 from scipy.optimize import fmin_bfgs
@@ -59,6 +59,14 @@ def log_likelihood(THETA, data):
 def neg_log_likelihood(THETA, data):
 	return log_likelihood(THETA, data) * -1
 
+def reg_loss_lasso(THETA, data, lamb, sign=None):
+	complexity = 0
+	
+	for theta in nditer(THETA): # since THETA is flat this is OK
+		complexity += abs(theta)
+		
+	return (lamb * neg_log_likelihood(THETA, data)) - ((1 - lamb) * complexity)
+
 def prob_a_given_X(THETA, X, a):
 	dot_Xi_Ta = dot(X, THETA[:,a])[0,0]
 	l_s_e = log_sum_exp(dot(X, THETA))
@@ -85,15 +93,15 @@ def classify(last_price, this_price):
 		return 1
 	
 	return 3
-		
-def gradient(THETA, data):
+	
+def gradient_lasso(THETA, data, lamb, sign_func):
 	THETA = unflatten_theta(THETA)
 	
 	GRAD_shape = THETA.shape
 	if len(GRAD_shape) == 1:
 		GRAD_shape = [1, THETA.shape[0]]
-	GRAD = np.zeros(GRAD_shape)
-	GRAD[:,:] = float_info.min
+	unregularised_GRAD = np.zeros(GRAD_shape)
+	unregularised_GRAD[:,:] = float_info.min
 	
 	for a in range(5):
 		T_a = THETA[:,a]
@@ -105,22 +113,18 @@ def gradient(THETA, data):
 			I = 1 if a == c else 0
 			delta_loss = multiply(X_i, I - prob_a_given_X(THETA, X_i, a))
 			delta_loss = [float(elem) for elem in nditer(delta_loss)]
-			GRAD[:,a] += delta_loss
+			unregularised_GRAD[:,a] += delta_loss
 	
-	flattened = np.reshape(sp.array(GRAD), (-1))
+	GRAD = (lamb * unregularised_GRAD) + ((1 - lamb) * sign_func(THETA))
 	
-	for i, elem in enumerate(flattened):
-		if elem == 0:
-			flattened[i] = float_info.min
-	
-	return flattened
+	return sp.array(GRAD.A1)
 
-def regression(data):
+def regression(data, lamb):
 	length_of_expansion = data[0][4].shape[1]
 	
 	initial_THETA = matrix(np.ones([length_of_expansion,5]))
 	
-	return fmin_bfgs(neg_log_likelihood, initial_THETA, fprime=gradient, args=[data])
+	return fmin_bfgs(reg_loss_lasso, initial_THETA, fprime=gradient_lasso, args=[data,lamb,sign])
 
 def hard_predict(THETA, X):
 	best_i = -1
@@ -157,8 +161,8 @@ def evaluate(data_CV1, data_CV2, THETA_CV1, THETA_CV2):
 def logistic(InputFileName):
 	raw_data = load_data(InputFileName)
 	
-	#all_normalised_data = normalise(raw_data)
-	all_normalised_data = raw_data
+	all_normalised_data = normalise(raw_data)
+	#all_normalised_data = raw_data
 	all_normalised_data = append_classifications(all_normalised_data)
 	training_data = append_features(all_normalised_data)
 	expander = FeatureExpander(training_data)
@@ -179,8 +183,9 @@ def logistic(InputFileName):
 	
 	[expanded_CV1, expanded_CV2] = split_data(expanded)
 	
-	THETA_CV1 = regression(expanded_CV1)
-	THETA_CV2 = regression(expanded_CV2)
+	lamb = 0.5
+	THETA_CV1 = regression(expanded_CV1, lamb)
+	THETA_CV2 = regression(expanded_CV2, lamb)
 	
 	print THETA_CV1
 	print THETA_CV2
