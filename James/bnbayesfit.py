@@ -75,20 +75,6 @@ def calc_posterior(data, node, parents, params, prior):
 
 	return (a0 + a1, b0 + b1)
 
-def Beta(alpha, beta):
-	return 1
-
-def most_likely_theta(occurences):
-	b = occurences[False]
-	a = occurences[True]
-	
-	if b == 0: return 1
-	
-	return pow(a / (a + b), 1 / b)
-
-def unnormalised_prob_theta_given_occurences(theta, occurences):
-	return theta**occurences[True] * (1 - theta)**occurences[False]
-
 def bnbayesfit(StructureFileName,DataFileName):
 	struct = read_csv(StructureFileName)
 	data = read_csv(DataFileName)
