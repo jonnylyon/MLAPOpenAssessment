@@ -16,182 +16,182 @@ fp = os.path.join(os.path.dirname(__file__), 'stock_price.csv')
 fp_out = os.path.join(os.path.dirname(__file__), 'stock_price_mod.csv')
 
 def append_classifications(source_data):
-	result_data=[]
-	
-	for i in range(len(source_data)):
-		this_row = source_data[i]
-		last_row = source_data[i-1]
-		this_row.append(classify(last_row[1], this_row[1]))
-		result_data.append(this_row)
-	
-	return result_data
-	
+    result_data=[]
+    
+    for i in range(len(source_data)):
+        this_row = source_data[i]
+        last_row = source_data[i-1]
+        this_row.append(classify(last_row[1], this_row[1]))
+        result_data.append(this_row)
+    
+    return result_data
+    
 def unflatten_theta(THETA):
-	if len(THETA.shape) > 1:
-		return THETA
-		
-	return matrix(reshape(THETA, (-1, 5)))
-	
+    if len(THETA.shape) > 1:
+        return THETA
+        
+    return matrix(reshape(THETA, (-1, 5)))
+    
 def log_sum_exp(XTHETA):
-	max = XTHETA[0,0]
-	for elem in nditer(XTHETA):
-		if elem > max:
-			max = elem
-	
-	sum = 0
-	
-	for elem in nditer(XTHETA):
-		sum += exp(elem - max)
+    max = XTHETA[0,0]
+    for elem in nditer(XTHETA):
+        if elem > max:
+            max = elem
+    
+    sum = 0
+    
+    for elem in nditer(XTHETA):
+        sum += exp(elem - max)
 
-	return (max + log(sum))
-	
+    return (max + log(sum))
+    
 def log_likelihood(THETA, data):
-	result = 0.0
-	THETA = unflatten_theta(THETA)
-	for i in range(len(data)):	
-		X = data[i][4]
-		c = data[i][2]
-		result += dot(X, THETA[:,c])[0,0]
-		result -= log_sum_exp(dot(X, THETA))
-	
-	return result
+    result = 0.0
+    THETA = unflatten_theta(THETA)
+    for i in range(len(data)):    
+        X = data[i][4]
+        c = data[i][2]
+        result += dot(X, THETA[:,c])[0,0]
+        result -= log_sum_exp(dot(X, THETA))
+    
+    return result
 
 def neg_log_likelihood(THETA, data):
-	return log_likelihood(THETA, data) * -1
+    return log_likelihood(THETA, data) * -1
 
 def reg_loss_lasso(THETA, data, lamb, sign=None):
-	complexity = 0
-	
-	for theta in nditer(THETA): # since THETA is flat this is OK
-		complexity += abs(theta)
-		
-	return (lamb * neg_log_likelihood(THETA, data)) - ((1 - lamb) * complexity)
+    complexity = 0
+    
+    for theta in nditer(THETA): # since THETA is flat this is OK
+        complexity += abs(theta)
+        
+    return (lamb * neg_log_likelihood(THETA, data)) - ((1 - lamb) * complexity)
 
 def prob_a_given_X(THETA, X, a):
-	dot_Xi_Ta = dot(X, THETA[:,a])[0,0]
-	l_s_e = log_sum_exp(dot(X, THETA))
-	
-	if l_s_e > 700:
-		return float_info.min
-	else:
-		numerator = exp(dot_Xi_Ta)
-		denominator = exp(l_s_e)
-		if denominator == 0:
-			denominator = float_info.min
-		return numerator / denominator
+    dot_Xi_Ta = dot(X, THETA[:,a])[0,0]
+    l_s_e = log_sum_exp(dot(X, THETA))
+    
+    if l_s_e > 700:
+        return float_info.min
+    else:
+        numerator = exp(dot_Xi_Ta)
+        denominator = exp(l_s_e)
+        if denominator == 0:
+            denominator = float_info.min
+        return numerator / denominator
 
 def classify(last_price, this_price):
-	percent_change = this_price / last_price
-	
-	if percent_change < 0.9:
-		return 4
-	if percent_change < 0.95:
-		return 2
-	if percent_change <= 1.05:
-		return 0
-	if percent_change <= 1.1:
-		return 1
-	
-	return 3
-	
+    percent_change = this_price / last_price
+    
+    if percent_change < 0.9:
+        return 4
+    if percent_change < 0.95:
+        return 2
+    if percent_change <= 1.05:
+        return 0
+    if percent_change <= 1.1:
+        return 1
+    
+    return 3
+    
 def gradient_lasso(THETA, data, lamb, sign_func):
-	THETA = unflatten_theta(THETA)
-	
-	GRAD_shape = THETA.shape
-	if len(GRAD_shape) == 1:
-		GRAD_shape = [1, THETA.shape[0]]
-	unregularised_GRAD = np.zeros(GRAD_shape)
-	unregularised_GRAD[:,:] = float_info.min
-	
-	for a in range(5):
-		T_a = THETA[:,a]
-		
-		for i in range(len(data)):
-			X_i = data[i][4]
-			c = data[i][2]
-			T_c = THETA[:,c]
-			I = 1 if a == c else 0
-			delta_loss = multiply(X_i, I - prob_a_given_X(THETA, X_i, a))
-			delta_loss = [float(elem) for elem in nditer(delta_loss)]
-			unregularised_GRAD[:,a] += delta_loss
-	
-	GRAD = (lamb * unregularised_GRAD) + ((1 - lamb) * sign_func(THETA))
-	
-	return sp.array(GRAD.A1)
+    THETA = unflatten_theta(THETA)
+    
+    GRAD_shape = THETA.shape
+    if len(GRAD_shape) == 1:
+        GRAD_shape = [1, THETA.shape[0]]
+    unregularised_GRAD = np.zeros(GRAD_shape)
+    unregularised_GRAD[:,:] = float_info.min
+    
+    for a in range(5):
+        T_a = THETA[:,a]
+        
+        for i in range(len(data)):
+            X_i = data[i][4]
+            c = data[i][2]
+            T_c = THETA[:,c]
+            I = 1 if a == c else 0
+            delta_loss = multiply(X_i, I - prob_a_given_X(THETA, X_i, a))
+            delta_loss = [float(elem) for elem in nditer(delta_loss)]
+            unregularised_GRAD[:,a] += delta_loss
+    
+    GRAD = (lamb * unregularised_GRAD) + ((1 - lamb) * sign_func(THETA))
+    
+    return sp.array(GRAD.A1)
 
 def regression(data, lamb):
-	length_of_expansion = data[0][4].shape[1]
-	
-	initial_THETA = matrix(np.ones([length_of_expansion,5]))
-	
-	return fmin_bfgs(reg_loss_lasso, initial_THETA, fprime=gradient_lasso, args=[data,lamb,sign])
+    length_of_expansion = data[0][4].shape[1]
+    
+    initial_THETA = matrix(np.ones([length_of_expansion,5]))
+    
+    return fmin_bfgs(reg_loss_lasso, initial_THETA, fprime=gradient_lasso, args=[data,lamb,sign])
 
 def hard_predict(THETA, X):
-	best_i = -1
-	p_best = -1
-	for i in range(5):
-		p_i = prob_a_given_X(THETA, X, i)
-		if prob_a_given_X(THETA, X, i) > p_best:
-			p_best = p_i
-			best_i = i
-	
-	return best_i
+    best_i = -1
+    p_best = -1
+    for i in range(5):
+        p_i = prob_a_given_X(THETA, X, i)
+        if prob_a_given_X(THETA, X, i) > p_best:
+            p_best = p_i
+            best_i = i
+    
+    return best_i
 
 def percentage_correct_classifications(THETA, data):
-	correct = 0
-	incorrect = 0
-	
-	for row in data:
-		actual_classification = row[2]
-		hard_prediction = hard_predict(THETA, row[4])
-		
-		if hard_prediction == actual_classification:
-			correct += 1
-		else:
-			incorrect += 1
-	
-	return (100 * correct) / (correct + incorrect)
-	
+    correct = 0
+    incorrect = 0
+    
+    for row in data:
+        actual_classification = row[2]
+        hard_prediction = hard_predict(THETA, row[4])
+        
+        if hard_prediction == actual_classification:
+            correct += 1
+        else:
+            incorrect += 1
+    
+    return (100 * correct) / (correct + incorrect)
+    
 def evaluate(data_CV1, data_CV2, THETA_CV1, THETA_CV2):
-	pc_CV1 = percentage_correct_classifications(unflatten_theta(THETA_CV2), data_CV1)
-	pc_CV2 = percentage_correct_classifications(unflatten_theta(THETA_CV1), data_CV2)
-	
-	return (pc_CV1 + pc_CV2) / 2
-			
+    pc_CV1 = percentage_correct_classifications(unflatten_theta(THETA_CV2), data_CV1)
+    pc_CV2 = percentage_correct_classifications(unflatten_theta(THETA_CV1), data_CV2)
+    
+    return (pc_CV1 + pc_CV2) / 2
+            
 def logistic(InputFileName):
-	raw_data = load_data(InputFileName)
-	
-	all_normalised_data = normalise(raw_data)
-	#all_normalised_data = raw_data
-	all_normalised_data = append_classifications(all_normalised_data)
-	training_data = append_features(all_normalised_data)
-	expander = FeatureExpander(training_data)
-	
-	inclusion_list = []
-	inclusion_list.append(0) # last change in sv
-	inclusion_list.append(0) # mean of prev 10 rows sv
-	inclusion_list.append(0) # std dev of prev 10 rows sv
-	inclusion_list.append(0) # last sv
-	inclusion_list.append(0) # last change in sp
-	inclusion_list.append(0) # mean of prev 10 rows sp
-	inclusion_list.append(0) # std dev of prev 10 rows sp
-	inclusion_list.append(0) # last sp
-	
-	expanded = expander.expand_features(inclusion_list)
-	
-	write_to_file(expanded, fp_out)
-	
-	[expanded_CV1, expanded_CV2] = split_data(expanded)
-	
-	lamb = 0.5
-	THETA_CV1 = regression(expanded_CV1, lamb)
-	THETA_CV2 = regression(expanded_CV2, lamb)
-	
-	print THETA_CV1
-	print THETA_CV2
-	return evaluate(expanded_CV1,expanded_CV2,THETA_CV1,THETA_CV2)
+    raw_data = load_data(InputFileName)
+    
+    all_normalised_data = normalise(raw_data)
+    #all_normalised_data = raw_data
+    all_normalised_data = append_classifications(all_normalised_data)
+    training_data = append_features(all_normalised_data)
+    expander = FeatureExpander(training_data)
+    
+    inclusion_list = []
+    inclusion_list.append(0) # last change in sv
+    inclusion_list.append(0) # mean of prev 10 rows sv
+    inclusion_list.append(0) # std dev of prev 10 rows sv
+    inclusion_list.append(0) # last sv
+    inclusion_list.append(0) # last change in sp
+    inclusion_list.append(0) # mean of prev 10 rows sp
+    inclusion_list.append(0) # std dev of prev 10 rows sp
+    inclusion_list.append(0) # last sp
+    
+    expanded = expander.expand_features(inclusion_list)
+    
+    write_to_file(expanded, fp_out)
+    
+    [expanded_CV1, expanded_CV2] = split_data(expanded)
+    
+    lamb = 0.5
+    THETA_CV1 = regression(expanded_CV1, lamb)
+    THETA_CV2 = regression(expanded_CV2, lamb)
+    
+    print THETA_CV1
+    print THETA_CV2
+    return evaluate(expanded_CV1,expanded_CV2,THETA_CV1,THETA_CV2)
 
 if __name__ == "__main__":
-	print datetime.now()
-	print logistic(fp)
-	print datetime.now()
+    print datetime.now()
+    print logistic(fp)
+    print datetime.now()
