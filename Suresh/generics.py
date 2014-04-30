@@ -8,7 +8,7 @@ import csv
 
 class FeatureExpander:
     def __init__(self, data):
-        self.data = data
+        self.data = deepcopy(data)
         
     def get_random_inclusion_list(self, feature_count):
         inclusion_list = []
@@ -38,6 +38,7 @@ class FeatureExpander:
         return expanded
 
 def append_features(source_data):
+    source_data = deepcopy(source_data)
     result_data=[]
     
     for i in range(10, len(source_data)):
@@ -77,12 +78,24 @@ def append_features(source_data):
 
     return result_data
 
-def split_data(all_data):
-    shuffle(all_data)
-    split = int(len(all_data)/2)
-    return [all_data[:split], all_data[split:]]
+def split_data(all_data, all_data_norm):
+    all_data = deepcopy(all_data)
+    all_data_norm = deepcopy(all_data_norm)
+    
+    indexes = range(len(all_data))
+    shuffle(indexes)
+    split = int(len(indexes)/2)
+    
+    split_1 = [all_data[i] for i in indexes[:split]]
+    split_2 = [all_data[i] for i in indexes[split:]]
+    
+    split_norm_1 = [all_data_norm[i] for i in indexes[:split]]
+    split_norm_2 = [all_data_norm[i] for i in indexes[split:]]
+    
+    return [split_1, split_2, split_norm_1, split_norm_2]
     
 def normalise(data):
+    data = deepcopy(data)
     all_sv = [row[0] for row in data]
     all_sp = [row[1] for row in data]
     
@@ -92,9 +105,14 @@ def normalise(data):
     sp_std = std(all_sp)
     sp_mean = mean(all_sp)
     
+    print sp_std
+    print sp_mean
+    
     for row in data:
-        row[0] = (row[0] - sv_mean) / sv_std
-        row[1] = (row[1] - sp_mean) / sp_std
+        #row[0] = (row[0] - sv_mean) / sv_std
+        #row[1] = (row[1] - sp_mean) / sp_std
+        row[0] = row[0] / sv_std
+        row[1] = row[1] / sp_std
     
     return data
 

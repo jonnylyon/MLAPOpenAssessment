@@ -21,6 +21,10 @@ def generate_squared_losses(THETA, data):
     
 def total_squared_loss(THETA, data):
     return sum(generate_squared_losses(THETA, data))
+    
+def mean_squared_loss(THETA, data):
+    losses = generate_squared_losses(THETA,data)
+    return sum(losses) / len(losses)
 
 def gradient(THETA, data):
     GRAD = []
@@ -48,48 +52,54 @@ def regression(data):
     return fmin_bfgs(total_squared_loss, initial_THETA, fprime=gradient, args=[data])
 
 def evaluate(data_CV1, data_CV2, THETA_CV1, THETA_CV2):
-    squared_losses_CV1 = generate_squared_losses(THETA_CV2, data_CV1)
-    squared_losses_CV2 = generate_squared_losses(THETA_CV1, data_CV2)
+    squared_losses_CV1 = mean_squared_loss(THETA_CV2, data_CV1)
+    squared_losses_CV2 = mean_squared_loss(THETA_CV1, data_CV2)
     
-    total_squared_loss = sum(squared_losses_CV1) + sum(squared_losses_CV2)
-    data_quantity = len(squared_losses_CV1) + len(squared_losses_CV2)
-    
-    return total_squared_loss / data_quantity
+    return (squared_losses_CV1 + squared_losses_CV2) / 2
         
 def linear(InputFileName):
     raw_data = load_data(InputFileName)
     
-    all_normalised_data = normalise(raw_data)
-    #all_normalised_data = raw_data
+    normalised_data = normalise(raw_data)
+    #normalised_data = raw_data
     
-    training_data = append_features(all_normalised_data)
-        
+    training_data = append_features(raw_data)
+    training_data_norm = append_features(normalised_data)
+    
     expander = FeatureExpander(training_data)
+    expander_norm = FeatureExpander(training_data_norm)
     
     inclusion_list = []
-    inclusion_list.append(0) # last change in sv
-    inclusion_list.append(0) # mean of prev 10 rows sv
-    inclusion_list.append(0) # std dev of prev 10 rows sv
-    inclusion_list.append(0) # last sv
-    inclusion_list.append(0) # last change in sp
-    inclusion_list.append(0) # mean of prev 10 rows sp
-    inclusion_list.append(0) # std dev of prev 10 rows sp
-    inclusion_list.append(0) # last sp
+    inclusion_list.append(1) # last change in sv
+    inclusion_list.append(1) # mean of prev 10 rows sv
+    inclusion_list.append(1) # std dev of prev 10 rows sv
+    inclusion_list.append(1) # last sv
+    inclusion_list.append(1) # last change in sp
+    inclusion_list.append(1) # mean of prev 10 rows sp
+    inclusion_list.append(1) # std dev of prev 10 rows sp
+    inclusion_list.append(1) # last sp
     
     expanded = expander.expand_features(inclusion_list)
+    expanded_norm = expander_norm.expand_features(inclusion_list)
     
-    write_to_file(expanded, fp_out)
+    write_to_file(expanded_norm, fp_out)
     
-    [expanded_CV1, expanded_CV2] = split_data(expanded)
+    [expanded_CV1, expanded_CV2, expanded_norm_CV1, expanded_norm_CV2] = split_data(expanded, expanded_norm)
     
-    THETA_CV1 = regression(expanded_CV1)
-    THETA_CV2 = regression(expanded_CV2)
+    THETA_CV1 = regression(expanded_norm_CV1)
+    THETA_CV2 = regression(expanded_norm_CV2)
+    
+    THETA_unnorm_CV1 = regression(expanded_CV1)
     
     result = evaluate(expanded_CV1,expanded_CV2,THETA_CV1,THETA_CV2)
+    result_norm = evaluate(expanded_norm_CV1, expanded_norm_CV2, THETA_CV1, THETA_CV2)
     
     print THETA_CV1
+    print THETA_unnorm_CV1
+    print
     print THETA_CV2
-    
+    print
+    print result_norm
     return result
     
 if __name__ == "__main__":
