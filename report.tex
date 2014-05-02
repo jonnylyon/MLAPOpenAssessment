@@ -1,0 +1,136 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[cm]{fullpage}
+\usepackage{bchart}
+\usepackage{pgfplots}
+
+\title{MLAP Open Assessment A}
+\author{Y6186228}
+\date{14th May 2014}
+
+\pgfplotsset{compat=1.10}
+
+\newcommand*{\foa}[1]{f(\theta) = \theta_0 + \theta_1 {#1}}
+\newcommand*{\fa}[1]{$\foa{#1}$}
+
+\newcommand*{\fob}[2]{f(\theta) = \theta_0 + \theta_1 {#1} + \theta_2 {#2}}
+\newcommand*{\fb}[2]{$\fob{#1}{#2}$}
+
+\newcommand*{\foc}[3]{f(\theta) = \theta_0 + \theta_1 {#1} + \theta_2 {#2} + \theta_3 {#3}}
+\newcommand*{\fc}[3]{$\foc{#1}{#2}{#3}$}
+
+\newcommand*{\fod}[4]{f(\theta) = \theta_0 + \theta_1 {#1} + \theta_2 {#2} + \theta_3 {#3} + \theta_4 {#4}}
+\newcommand*{\fd}[4]{$\fod{#1}{#2}{#3}{#4}$}
+
+\newcommand*{\foe}[5]{f(\theta) = \theta_0 + \theta_1 {#1} + \theta_2 {#2} + \theta_3 {#3} + \theta_4 {#4} + \theta_5 {#5}}
+\newcommand*{\fe}[5]{$\foe{#1}{#2}{#3}{#4}{#5}$}
+
+\begin{document}
+\maketitle
+
+\section{Linear regression and Logistic regression}
+\subsection{Task 1}
+In order to experiment with linear regression I have chosen to use the following 8 features, referred to in equations as $a$ through $h$ for brevity:\\
+
+\begin{tabular}{l l}
+	$a$	& stock volume of previous day \\
+	$b$	& difference between the previous two days' stock volumes \\
+	$c$	& mean of stock volumes from previous ten days \\
+	$d$	& standard deviation of stock volumes from previous ten days \\
+	$e$	& stock price of previous day \\
+	$f$	& difference between the previous two days' stock prices \\
+	$g$	& mean of stock prices from previous ten days \\
+	$h$	& standard deviation of stock prices from previous ten days
+\end{tabular}\\
+
+Further, the elements of a vector $\theta$ represent the coefficients of a regression function, with $\theta_0$ always representing the constant term.  Hence, a regression function might look as follows:
+
+\[ \fob{a}{a^2} \]
+
+Figure \ref{task1onetwoorder} shows the Mean Squared Errors (MSEs) obtained in my initial phase of experimentation with the chosen features, shown to three significant figures.  In this phase of experimentation, I evaluated the performance of each feature used on its own in first- and second-order polynomials.
+
+\begin{figure}
+\centering
+\begin{bchart}[step=20,max=80]
+	\bcbar[label={\fa{a}}]{45.2}
+		\smallskip
+	\bcbar[label={\fa{b}}]{68.4}
+		\smallskip
+	\bcbar[label={\fa{c}}]{36.5}
+		\smallskip
+	\bcbar[label={\fa{d}}]{49.8}
+		\smallskip
+	\bcbar[label={\fa{e}}]{49.9}
+		\smallskip
+	\bcbar[label={\fa{f}}]{70.2}
+		\smallskip
+	\bcbar[label={\fa{g}}]{1.63}
+		\smallskip
+	\bcbar[label={\fa{h}}]{25.7}
+		\smallskip
+	\bcbar[label={\fb{a}{a^2}}]{43.9}
+		\smallskip
+	\bcbar[label={\fb{b}{b^2}}]{44.7}
+		\smallskip
+	\bcbar[label={\fb{c}{c^2}}]{35.9}
+		\smallskip
+	\bcbar[label={\fb{d}{d^2}}]{50.9}
+		\smallskip
+	\bcbar[label={\fb{e}{e^2}}]{0.382}
+		\smallskip
+	\bcbar[label={\fb{f}{f^2}}]{55.8}
+		\smallskip
+	\bcbar[label={\fb{g}{g^2}}]{1.55}
+		\smallskip
+	\bcbar[label={\fb{h}{h^2}}]{23.1}
+\end{bchart}
+\caption{MSEs obtained using each of the features on their own in first- and second-order polynomials}
+\label{task1onetwoorder}
+\end{figure}
+
+It is clear from these results that the best performances come when using the features that relate to stock price as opposed to stock value ($e$ -- $h$).  However, feature $f$, the difference between the last two days' stock prices does not appear to perform very well.  Feature $e$ does not perform well as a first-order polynomial, but is exceptionally good as a second-order polynomial.
+
+My next phase of experimentation is to take the high-performing features and try using them on their own in third-order polynomial functions.  Following this, I will experiment with combining the better performing features to see what improvements can be made.  The results of the initial third-order polynomial experiments are shown in figure \ref{task1threeorder}.  Out of interest, I have chosen to try feature $c$ as a third-order polynomial as it was the best performing of the stock volume-related features.
+
+\begin{figure}
+\centering
+\begin{bchart}[step=20,max=80]
+	\bcbar[label={\fc{c}{c^2}{c^3}}]{32.8}
+		\smallskip
+	\bcbar[label={\fc{e}{e^2}{e^3}}]{0.376}
+		\smallskip
+	\bcbar[label={\fc{g}{g^2}{g^3}}]{1.65}
+		\smallskip
+	\bcbar[label={\fc{h}{h^2}{h^3}}]{23.0}
+\end{bchart}
+\caption{MSEs obtained using selected features on their own in three-order polynomials}
+\label{task1threeorder}
+\end{figure}
+
+As seen by the results, each feature tested in third-order polynomials had very similar results to the second-order polynomial tests.  Going forward, I have chosen to try a function combining $e$ and $g$ both as second-order polynomials to see if they perform well as a pair.  I am also interested to to see if the recent change in stock volume ($b$) combined with the mean of the last ten days' stock prices ($g$) gives an indication of the next stock price.  Further, combining $a$, $b$, $d$ and $g$ all together may give good results.  The MSEs obtained for these tests are shown in figure \ref{task1complex} (note the change of scale for this chart).
+
+\begin{figure}
+\centering
+\begin{bchart}[step=1,max=2]
+	\bcbar[label={\fd{e}{e^2}{g}{g^2}}]{0.392}
+		\smallskip
+	\bcbar[label={\fd{b}{b^2}{g}{g^2}}]{1.56}
+		\smallskip
+	\bcbar[label={\fe{a}{b}{d}{g}{g^2}}]{1.46}
+\end{bchart}
+\caption{MSEs obtained when combining features into more complex polynomials}
+\label{task1complex}
+\end{figure}
+
+From these results we can see that combining $e$ and $g$ does not really improve on the performance achieved when using $e$ alone.  Also, combining $g$ variously with $a$, $b$ and $d$ does not improve on the performance of using $g$ alone.
+
+\subsection{Task 2}
+
+\subsection{Task 3}
+
+\section{Bayesian networks}
+
+\subsection{Task 4}
+
+\subsection{Task 5}
+
+\end{document}
