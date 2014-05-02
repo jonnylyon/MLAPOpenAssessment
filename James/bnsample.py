@@ -50,13 +50,6 @@ def bnsample(fittedbn,nsamples):
 if __name__ == "__main__":
     print datetime.now()
     fittedbn = bnbayesfit(struct_fp, data_fp)
-    
-    count = [0 for i in range(8)]
-    for row in bnsample(fittedbn, 1000):
-        for i, val in enumerate(row):
-            count[i] += val
-    
-    averages = [c / 1000 for c in count]
-    print averages
+    print bnsample(fittedbn, 10)
     
     print datetime.now()

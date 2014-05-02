@@ -61,11 +61,11 @@ def evaluate(data_CV1, data_CV2, THETA_CV1, THETA_CV2, lamb):
 
     return (loss_CV1 + loss_CV2) / 2
         
-def linear(InputFileName):
+def reglinear(InputFileName):
     raw_data = load_data(InputFileName)
     
-    all_normalised_data = normalise(raw_data)
-    #all_normalised_data = raw_data
+    #all_normalised_data = normalise(raw_data)
+    all_normalised_data = raw_data
     
     training_data = append_features(all_normalised_data)
         
@@ -73,13 +73,13 @@ def linear(InputFileName):
     
     inclusion_list = []
     inclusion_list.append(1) # last change in sv
-    inclusion_list.append(0) # mean of prev 10 rows sv
-    inclusion_list.append(0) # std dev of prev 10 rows sv
-    inclusion_list.append(4) # last sv
-    inclusion_list.append(0) # last change in sp
-    inclusion_list.append(0) # mean of prev 10 rows sp
-    inclusion_list.append(0) # std dev of prev 10 rows sp
-    inclusion_list.append(0) # last sp
+    inclusion_list.append(1) # mean of prev 10 rows sv
+    inclusion_list.append(1) # std dev of prev 10 rows sv
+    inclusion_list.append(1) # last sv
+    inclusion_list.append(1) # last change in sp
+    inclusion_list.append(1) # mean of prev 10 rows sp
+    inclusion_list.append(1) # std dev of prev 10 rows sp
+    inclusion_list.append(1) # last sp
     
     expanded = expander.expand_features(inclusion_list)
     
@@ -104,5 +104,5 @@ def linear(InputFileName):
     
 if __name__ == "__main__":
     print datetime.now()
-    print linear(fp)
+    print reglinear(fp)
     print datetime.now()

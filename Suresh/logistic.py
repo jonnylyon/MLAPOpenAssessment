@@ -157,21 +157,20 @@ def evaluate(data_CV1, data_CV2, THETA_CV1, THETA_CV2):
 def logistic(InputFileName):
     raw_data = load_data(InputFileName)
     
-    #all_normalised_data = normalise(raw_data)
-    all_normalised_data = raw_data
+    all_normalised_data = normalise(raw_data)
     all_normalised_data = append_classifications(all_normalised_data)
     training_data = append_features(all_normalised_data)
     expander = FeatureExpander(training_data)
     
     inclusion_list = []
+    inclusion_list.append(2) # last sv
     inclusion_list.append(0) # last change in sv
     inclusion_list.append(0) # mean of prev 10 rows sv
     inclusion_list.append(0) # std dev of prev 10 rows sv
-    inclusion_list.append(0) # last sv
-    inclusion_list.append(0) # last change in sp
-    inclusion_list.append(0) # mean of prev 10 rows sp
-    inclusion_list.append(0) # std dev of prev 10 rows sp
     inclusion_list.append(0) # last sp
+    inclusion_list.append(0) # last change in sp
+    inclusion_list.append(1) # mean of prev 10 rows sp
+    inclusion_list.append(0) # std dev of prev 10 rows sp
     
     expanded = expander.expand_features(inclusion_list)
     

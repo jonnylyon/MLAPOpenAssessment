@@ -2,6 +2,7 @@
 \usepackage[cm]{fullpage}
 \usepackage{bchart}
 \usepackage{pgfplots}
+\usepackage{listings}
 
 \title{MLAP Open Assessment A}
 \author{Y6186228}
@@ -44,7 +45,7 @@ In order to experiment with linear regression I have chosen to use the following
 
 Further, the elements of a vector $\theta$ represent the coefficients of a regression function, with $\theta_0$ always representing the constant term.  Hence, a regression function might look as follows:
 
-\[ \fob{a}{a^2} \]
+\[ \foc{a}{a^2}{b} \]
 
 Figure \ref{task1onetwoorder} shows the Mean Squared Errors (MSEs) obtained in my initial phase of experimentation with the chosen features, shown to three significant figures.  In this phase of experimentation, I evaluated the performance of each feature used on its own in first- and second-order polynomials.
 
@@ -125,12 +126,146 @@ From these results we can see that combining $e$ and $g$ does not really improve
 
 \subsection{Task 2}
 
+The same features, represented as $a$ through $h$, are used in this task.  For simplicity, I will simply list the features and powers used in each test (for example, $a,a^2,b$).  The constant term is implicitly used in every case.
+
+Again, I started by evaluating the use of each feature on its own in first- and second-order polynomials.
+
+\begin{figure}
+\centering
+\begin{bchart}[step=20,max=100]
+	\bcbar[label={$a$}]{30.6}
+		\smallskip
+	\bcbar[label={$b$}]{37.0}
+		\smallskip
+	\bcbar[label={$c$}]{39.6}
+		\smallskip
+	\bcbar[label={$d$}]{27.2}
+		\smallskip
+	\bcbar[label={$e$}]{30.8}
+		\smallskip
+	\bcbar[label={$f$}]{45.6}
+		\smallskip
+	\bcbar[label={$g$}]{27.2}
+		\smallskip
+	\bcbar[label={$h$}]{45.5}
+		\smallskip
+	\bcbar[label={$a,a^2$}]{39.9}
+		\smallskip
+	\bcbar[label={$b,b^2$}]{12.9}
+		\smallskip
+	\bcbar[label={$c,c^2$}]{29.4}
+		\smallskip
+	\bcbar[label={$d,d^2$}]{30.4}
+		\smallskip
+	\bcbar[label={$e,e^2$}]{35.3}
+		\smallskip
+	\bcbar[label={$f,f^2$}]{45.7}
+		\smallskip
+	\bcbar[label={$g,g^2$}]{26.4}
+		\smallskip
+	\bcbar[label={$h,h^2$}]{45.6}
+\end{bchart}
+\caption{\% accuracies obtained using each of the features on their own in first- and second-order polynomials}
+\label{task2onetwoorder}
+\end{figure}
+
+Figure \ref{task2onetwoorder} shows the percentage accuracy achieved by each of the tests using each feature individually in first- and second-order polynomials.  As can be seen, the high performing features ($f$, $h$) did not benefit from being included in a squared form.  Some of the features were better used in their second-order polynomials than in their first-order ones (e.g. $a$) while others were significantly worse (e.g. $b$).
+
+I now will test the performance of using different combinations of features.  One such combination is $f,h$, to see if combining them improves on their individual successes.  Also, the pairs $e,h$ and $g,h$, since each pair can give an idea for the general spread of recent stock price data in terms of percentage.  The effect of relationship between $c,g$ is also interesting to test, as well as the quadruple of $a,c,e,g$, since it includes information about the relationship between the last day's data and the mean data from the last 10 days.  In each test, each feature will be raised to the power at which it performed best from the previous tests.
+
+\begin{figure}
+\centering
+\begin{bchart}[step=20,max=100]
+	\bcbar[label={$f,h$}]{45.5}
+		\smallskip
+	\bcbar[label={$e,e^2,h$}]{24.6}
+		\smallskip
+	\bcbar[label={$g,h$}]{25.7}
+		\smallskip
+	\bcbar[label={$c,g$}]{38.4}
+		\smallskip
+	\bcbar[label={$a,a^2,c,e,e^2,g$}]{45.0}
+		\smallskip
+	\bcbar[label={$a,a^2,c,g$}]{44.1}
+\end{bchart}
+\caption{\% accuracies obtained when combining features into more complex polynomials}
+\label{task2complex}
+\end{figure}
+
+As with task 1, it is seen from the results that combining features did not really improve the performance.  Features $f$ and $h$ perform as well individually as when combined together, for example.  The $e,e^2,h$ result is worse than all of the $e$ and $h$ independent results, which is also true for the $g,h$ result.  $c,g$ performed only as well as $c$ on its own.  $a,a^2,c,e,e^2,g$ is the only combination that performs better as a group than any of its constituents on its own.  After the relative success of $a,a^2,c,e,e^2,g$, I chose to try removing $e$ in case it was dragging the success down.  As can be seen, this did not give any improvement.
+
 \subsection{Task 3}
 
 \section{Bayesian networks}
 
-\subsection{Task 4}
+\subsection{Task 5 Question 1}
 
-\subsection{Task 5}
+A conditional probability $P(A|B)$ could be estimated by selecting all of the instantiations that satisfy the condition $B$ and calculating the proportion of those for which $A$ is true.
+
+For example, if we want to estimate $P(7=1|6=1)$ (The probability that node 7 is set to 1 given that node 6 is set to 1) then we produce a sample and select from it all of the instantiations in which node 6 is set to 1.  Figure \ref{sample1} shows a full sample of 10 instantiations, with the selected instantiations marked using an asterisk (*).
+
+\begin{figure}[h]
+	\centering
+	\lstset{basicstyle=\ttfamily}
+	\begin{tabular}{c}
+	\begin{lstlisting}
+[1, 0, 0, 0, 0, 0, 1, 1] *
+[0, 0, 1, 0, 0, 0, 1, 1] *
+[1, 0, 1, 0, 0, 0, 1, 1] *
+[0, 0, 0, 0, 0, 0, 1, 0] *
+[1, 0, 0, 0, 0, 0, 1, 0] *
+[1, 0, 1, 0, 0, 0, 1, 0] *
+[0, 0, 1, 0, 0, 0, 1, 1] *
+[0, 0, 0, 0, 0, 0, 0, 0]
+[0, 0, 0, 0, 0, 0, 1, 0] *
+[1, 0, 1, 0, 0, 0, 1, 1] *
+	\end{lstlisting}
+	\end{tabular}
+	\caption{A sample of size 10, with the instantiations where node 6 is set to 1 marked by asterisks}
+	\label{sample1}
+\end{figure}
+
+From the selection, we find out how many instantiations also have node 7 set to 1. Figure \ref{sample2} shows just the 9 selected rows, and marks the rows in which node 7 is set to 1 with a plus sign (+).
+
+\begin{figure}[h]
+	\centering
+	\lstset{basicstyle=\ttfamily}
+	\begin{tabular}{c}
+	\begin{lstlisting}
+[1, 0, 0, 0, 0, 0, 1, 1] +
+[0, 0, 1, 0, 0, 0, 1, 1] +
+[1, 0, 1, 0, 0, 0, 1, 1] +
+[0, 0, 0, 0, 0, 0, 1, 0] 
+[1, 0, 0, 0, 0, 0, 1, 0] 
+[1, 0, 1, 0, 0, 0, 1, 0] 
+[0, 0, 1, 0, 0, 0, 1, 1] +
+[0, 0, 0, 0, 0, 0, 1, 0] 
+[1, 0, 1, 0, 0, 0, 1, 1] +
+	\end{lstlisting}
+	\end{tabular}
+	\caption{The selected rows from figure \ref{sample1}, with the instantiations where node 7 is set to 1 marked by plus signs}
+	\label{sample2}
+\end{figure}
+
+We can see that, of the 9 instantiations that satisfy $6=1$, 5 also satisfy $7=1$.  We therefore estimate that $P(7=1|6=1) = \frac{5}{9}$.
+
+\subsection{Task 5 Question 2}
+
+\textbf{I have yet to answer this question.}
+
+\subsection{Task 5 Question 3}
+
+I will use the same example in this question as in question 1 (find $P(7=1|6=1)$).  From the original data provided in bndata.csv, we know that the probability is $3688 / 8887 = 0.415$ (3dp).  Using the method described above, I will estimate the probability based on 100, 1000, 5000 and 10,000 samples and record them in the table below.  The final column shows the percentage error of the estimation.
+
+\begin{tabular}{l l l l l}
+	Samples		& Number where 6 = 1	& Number where 7 = 1	& Estimated probability (5dp)		& Error (3sf) \\
+	\hline
+	100		& 87	& 28	& 0.32184		& 22.4 \\
+	1000	& 885	& 360	& 0.40678		& 0.0198 \\
+	5000	& 4450	& 1834	& 0.41213		& 0.00692 \\
+	10,000	& 8888	& 3691	& 0.41528		& 0.000675
+\end{tabular}
+
+Here, the accuracy of the estimation is shown to get gradually better and better as the number of samples increases from 100 to 10,000.
 
 \end{document}
