@@ -48,6 +48,9 @@ def append_features(source_data):
         prev_10_sv = [row[0] for row in source_data[i-10:i]]
         prev_10_sp = [row[1] for row in source_data[i-10:i]]
         
+        # last sv
+        feature_list.append(prev_10_sv[9])
+        
         # last change in sv
         feature_list.append(prev_10_sv[9] - prev_10_sv[8])
         
@@ -57,8 +60,8 @@ def append_features(source_data):
         # std dev of prev 10 rows sv
         feature_list.append(std(prev_10_sv))
         
-        # last sv
-        feature_list.append(prev_10_sv[9])
+        # last sp
+        feature_list.append(prev_10_sp[9])
         
         # last change in sp
         feature_list.append(prev_10_sp[9] - prev_10_sp[8])
@@ -68,9 +71,6 @@ def append_features(source_data):
         
         # std dev of prev 10 rows sp
         feature_list.append(std(prev_10_sp))
-        
-        # last sp
-        feature_list.append(prev_10_sp[9])
 
         this_row.append(feature_list)
         result_data.append(this_row)
