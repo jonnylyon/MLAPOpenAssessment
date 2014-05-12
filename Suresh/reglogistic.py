@@ -161,21 +161,21 @@ def evaluate(data_CV1, data_CV2, THETA_CV1, THETA_CV2):
 def logistic(InputFileName):
     raw_data = load_data(InputFileName)
     
-    all_normalised_data = normalise(raw_data)
-    #all_normalised_data = raw_data
-    all_normalised_data = append_classifications(all_normalised_data)
+    all_normalised_data = append_classifications(raw_data)
+    #all_normalised_data = normalise(all_normalised_data)
+    all_normalised_data = all_normalised_data
     training_data = append_features(all_normalised_data)
     expander = FeatureExpander(training_data)
     
     inclusion_list = []
+    inclusion_list.append(0) # last sv
     inclusion_list.append(0) # last change in sv
     inclusion_list.append(0) # mean of prev 10 rows sv
     inclusion_list.append(0) # std dev of prev 10 rows sv
-    inclusion_list.append(0) # last sv
-    inclusion_list.append(0) # last change in sp
+    inclusion_list.append(0) # last sp
+    inclusion_list.append(1) # last change in sp
     inclusion_list.append(0) # mean of prev 10 rows sp
     inclusion_list.append(0) # std dev of prev 10 rows sp
-    inclusion_list.append(0) # last sp
     
     expanded = expander.expand_features(inclusion_list)
     
@@ -183,13 +183,30 @@ def logistic(InputFileName):
     
     [expanded_CV1, expanded_CV2] = split_data(expanded)
     
-    lamb = 0.5
-    THETA_CV1 = regression(expanded_CV1, lamb)
-    THETA_CV2 = regression(expanded_CV2, lamb)
+    results = []
+    #for i in range(1,101):
+    for i in range(1,10):
+        print i
+        lamb = i * 0.1
+        THETA_CV1 = regression(expanded_CV1, lamb)
+        THETA_CV2 = regression(expanded_CV2, lamb)
+        
+        results.append(evaluate(expanded_CV1,expanded_CV2,THETA_CV1,THETA_CV2))
     
-    print THETA_CV1
-    print THETA_CV2
-    return evaluate(expanded_CV1,expanded_CV2,THETA_CV1,THETA_CV2)
+    for result in results:
+        print result
+    
+    best_result = max(results)
+    
+    return (results.index(best_result) * 0.1, best_result)
+    
+    # lamb = 0.5
+    # THETA_CV1 = regression(expanded_CV1, lamb)
+    # THETA_CV2 = regression(expanded_CV2, lamb)
+    
+    # print THETA_CV1
+    # print THETA_CV2
+    # return evaluate(expanded_CV1,expanded_CV2,THETA_CV1,THETA_CV2)
 
 if __name__ == "__main__":
     print datetime.now()

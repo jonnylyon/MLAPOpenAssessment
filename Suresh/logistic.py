@@ -137,14 +137,20 @@ def percentage_correct_classifications(THETA, data):
     correct = 0
     incorrect = 0
     
+    class_count = [0,0,0,0,0]
+    
     for row in data:
         actual_classification = row[2]
         hard_prediction = hard_predict(THETA, row[4])
+        
+        class_count[hard_prediction] += 1
         
         if hard_prediction == actual_classification:
             correct += 1
         else:
             incorrect += 1
+            
+    print class_count
     
     return (100 * correct) / (correct + incorrect)
     
@@ -157,15 +163,16 @@ def evaluate(data_CV1, data_CV2, THETA_CV1, THETA_CV2):
 def logistic(InputFileName):
     raw_data = load_data(InputFileName)
     
-    all_normalised_data = normalise(raw_data)
-    all_normalised_data = append_classifications(all_normalised_data)
+    all_normalised_data = append_classifications(raw_data)
+    all_normalised_data = normalise(all_normalised_data)
+    #all_normalised_data = all_normalised_data
     training_data = append_features(all_normalised_data)
     expander = FeatureExpander(training_data)
     
     inclusion_list = []
     inclusion_list.append(2) # last sv
     inclusion_list.append(0) # last change in sv
-    inclusion_list.append(0) # mean of prev 10 rows sv
+    inclusion_list.append(1) # mean of prev 10 rows sv
     inclusion_list.append(0) # std dev of prev 10 rows sv
     inclusion_list.append(0) # last sp
     inclusion_list.append(0) # last change in sp
