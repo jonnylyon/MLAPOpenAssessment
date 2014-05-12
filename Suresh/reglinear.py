@@ -51,15 +51,23 @@ def gradient_lasso(THETA, data, lamb, sign_func):
 def regression(data, lamb):
     length_of_expansion = data[0][-1].shape[1]
     
-    initial_THETA = matrix(np.zeros([length_of_expansion,1]))
+    initial_THETA = matrix(np.ones([length_of_expansion,1]))
     
     return fmin_bfgs(reg_loss_lasso, initial_THETA, fprime=gradient_lasso, args=[data,lamb,sign])
 
-def evaluate(data_CV1, data_CV2, THETA_CV1, THETA_CV2, lamb):
-    loss_CV1 = reg_loss_lasso(THETA_CV2, data_CV1, lamb)
-    loss_CV2 = reg_loss_lasso(THETA_CV1, data_CV2, lamb)
+def evaluate(data_CV1, data_CV2, THETA_CV1, THETA_CV2):
+    squared_losses_CV1 = generate_squared_losses(THETA_CV2, data_CV1)
+    squared_losses_CV2 = generate_squared_losses(THETA_CV1, data_CV2)
+    
+    total_squared_loss = sum(squared_losses_CV1) + sum(squared_losses_CV2)
+    data_quantity = len(squared_losses_CV1) + len(squared_losses_CV2)
+    
+    return total_squared_loss / data_quantity
+# def evaluate(data_CV1, data_CV2, THETA_CV1, THETA_CV2, lamb):
+    # loss_CV1 = reg_loss_lasso(THETA_CV2, data_CV1, lamb)
+    # loss_CV2 = reg_loss_lasso(THETA_CV1, data_CV2, lamb)
 
-    return (loss_CV1 + loss_CV2) / 2
+    # return (loss_CV1 + loss_CV2) / 2
         
 def reglinear(InputFileName):
     raw_data = load_data(InputFileName)
@@ -72,14 +80,14 @@ def reglinear(InputFileName):
     expander = FeatureExpander(training_data)
     
     inclusion_list = []
+    inclusion_list.append(0) # last sv
     inclusion_list.append(1) # last change in sv
-    inclusion_list.append(1) # mean of prev 10 rows sv
-    inclusion_list.append(1) # std dev of prev 10 rows sv
-    inclusion_list.append(1) # last sv
-    inclusion_list.append(1) # last change in sp
-    inclusion_list.append(1) # mean of prev 10 rows sp
-    inclusion_list.append(1) # std dev of prev 10 rows sp
-    inclusion_list.append(1) # last sp
+    inclusion_list.append(0) # mean of prev 10 rows sv
+    inclusion_list.append(0) # std dev of prev 10 rows sv
+    inclusion_list.append(0) # last sp
+    inclusion_list.append(0) # last change in sp
+    inclusion_list.append(0) # mean of prev 10 rows sp
+    inclusion_list.append(0) # std dev of prev 10 rows sp
     
     expanded = expander.expand_features(inclusion_list)
     
@@ -88,19 +96,20 @@ def reglinear(InputFileName):
     [expanded_CV1, expanded_CV2] = split_data(expanded)
     
     results = []
-    for i in range(11):
-        lamb = i * 0.1
+    for i in range(101):
+        print i
+        lamb = i * 0.01
         THETA_CV1 = regression(expanded_CV1, lamb)
         THETA_CV2 = regression(expanded_CV2, lamb)
         
-        results.append(evaluate(expanded_CV1,expanded_CV2,THETA_CV1,THETA_CV2,lamb))
+        results.append(evaluate(expanded_CV1,expanded_CV2,THETA_CV1,THETA_CV2))
     
     for result in results:
         print result
     
     best_result = min(results)
     
-    return best_result
+    return (results.index(best_result) * 0.01, best_result)
     
 if __name__ == "__main__":
     print datetime.now()
