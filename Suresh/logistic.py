@@ -172,7 +172,7 @@ def logistic(InputFileName):
     inclusion_list = []
     inclusion_list.append(2) # last sv
     inclusion_list.append(0) # last change in sv
-    inclusion_list.append(1) # mean of prev 10 rows sv
+    inclusion_list.append(2) # mean of prev 10 rows sv
     inclusion_list.append(0) # std dev of prev 10 rows sv
     inclusion_list.append(0) # last sp
     inclusion_list.append(0) # last change in sp

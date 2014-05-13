@@ -3,6 +3,7 @@
 \usepackage{bchart}
 \usepackage{pgfplots}
 \usepackage{listings}
+\usepackage[colorinlistoftodos]{todonotes}
 
 \title{MLAP Open Assessment A}
 \author{Y6186228}
@@ -133,37 +134,37 @@ Again, I started by evaluating the use of each feature on its own in first- and 
 \begin{figure}
 \centering
 \begin{bchart}[step=20,max=100]
-	\bcbar[label={$a$}]{30.6}
+	\bcbar[label={$a$}]{52.8}
 		\smallskip
-	\bcbar[label={$b$}]{37.0}
+	\bcbar[label={$b$}]{75.9}
 		\smallskip
-	\bcbar[label={$c$}]{39.6}
+	\bcbar[label={$c$}]{30.8}
 		\smallskip
-	\bcbar[label={$d$}]{27.2}
+	\bcbar[label={$d$}]{85.9}
 		\smallskip
-	\bcbar[label={$e$}]{30.8}
+	\bcbar[label={$e$}]{43.5}
 		\smallskip
-	\bcbar[label={$f$}]{45.6}
+	\bcbar[label={$f$}]{86.2}
 		\smallskip
-	\bcbar[label={$g$}]{27.2}
+	\bcbar[label={$g$}]{76.7}
 		\smallskip
-	\bcbar[label={$h$}]{45.5}
+	\bcbar[label={$h$}]{86.1}
 		\smallskip
-	\bcbar[label={$a,a^2$}]{39.9}
+	\bcbar[label={$a,a^2$}]{76.5}
 		\smallskip
-	\bcbar[label={$b,b^2$}]{12.9}
+	\bcbar[label={$b,b^2$}]{64.6}
 		\smallskip
-	\bcbar[label={$c,c^2$}]{29.4}
+	\bcbar[label={$c,c^2$}]{86.2}
 		\smallskip
-	\bcbar[label={$d,d^2$}]{30.4}
+	\bcbar[label={$d,d^2$}]{35.4}
 		\smallskip
-	\bcbar[label={$e,e^2$}]{35.3}
+	\bcbar[label={$e,e^2$}]{19.5}
 		\smallskip
-	\bcbar[label={$f,f^2$}]{45.7}
+	\bcbar[label={$f,f^2$}]{86.0}
 		\smallskip
-	\bcbar[label={$g,g^2$}]{26.4}
+	\bcbar[label={$g,g^2$}]{21.1}
 		\smallskip
-	\bcbar[label={$h,h^2$}]{45.6}
+	\bcbar[label={$h,h^2$}]{86.2}
 \end{bchart}
 \caption{\% accuracies obtained using each of the features on their own in first- and second-order polynomials}
 \label{task2onetwoorder}
@@ -171,28 +172,32 @@ Again, I started by evaluating the use of each feature on its own in first- and 
 
 Figure \ref{task2onetwoorder} shows the percentage accuracy achieved by each of the tests using each feature individually in first- and second-order polynomials.  As can be seen, the high performing features ($f$, $h$) did not benefit from being included in a squared form.  Some of the features were better used in their second-order polynomials than in their first-order ones (e.g. $a$) while others were significantly worse (e.g. $b$).
 
-I now will test the performance of using different combinations of features.  One such combination is $f,h$, to see if combining them improves on their individual successes.  Also, the pairs $e,h$ and $g,h$, since each pair can give an idea for the general spread of recent stock price data in terms of percentage.  The effect of relationship between $c,g$ is also interesting to test, as well as the quadruple of $a,c,e,g$, since it includes information about the relationship between the last day's data and the mean data from the last 10 days.  In each test, each feature will be raised to the power at which it performed best from the previous tests.
+I now will test the performance of using different combinations of features.  One such combination is $f,h$, to see if combining them improves on their individual successes.  Also, the pairs $e,h$ and $g,h$, since each pair can give an idea for the general spread of recent stock price data in terms of percentage.  The effect of relationship between $c,g$ is also interesting to test, as well as the quadruple of $a,c,e,g$, since it includes information about the relationship between the last day's data and the mean data from the last 10 days.  I will also see what happens if I combine all four of the features that achieved scores in the region of 86\%{} individually ($a,d,f,h$).  In each test, each feature will be raised to the power at which it performed best from the previous tests.
 
 \begin{figure}
 \centering
 \begin{bchart}[step=20,max=100]
-	\bcbar[label={$f,h$}]{45.5}
+	\bcbar[label={$c,c^2,d,f,h$}]{59.3}
 		\smallskip
-	\bcbar[label={$e,e^2,h$}]{24.6}
+	\bcbar[label={$f,h$}]{86.2}
 		\smallskip
-	\bcbar[label={$g,h$}]{25.7}
+	\bcbar[label={$e,h$}]{63.2}
 		\smallskip
-	\bcbar[label={$c,g$}]{38.4}
+	\bcbar[label={$g,h$}]{46.8}
 		\smallskip
-	\bcbar[label={$a,a^2,c,e,e^2,g$}]{45.0}
+	\bcbar[label={$c,c^2,g$}]{11.3}
 		\smallskip
-	\bcbar[label={$a,a^2,c,g$}]{44.1}
+	\bcbar[label={$a,a^2,c,c^2,e,g$}]{86.1}
+		\smallskip
+	\bcbar[label={$a,a^2,c,c^2,g$}]{85.3}
 \end{bchart}
 \caption{\% accuracies obtained when combining features into more complex polynomials}
 \label{task2complex}
 \end{figure}
 
-As with task 1, it is seen from the results that combining features did not really improve the performance.  Features $f$ and $h$ perform as well individually as when combined together, for example.  The $e,e^2,h$ result is worse than all of the $e$ and $h$ independent results, which is also true for the $g,h$ result.  $c,g$ performed only as well as $c$ on its own.  $a,a^2,c,e,e^2,g$ is the only combination that performs better as a group than any of its constituents on its own.  After the relative success of $a,a^2,c,e,e^2,g$, I chose to try removing $e$ in case it was dragging the success down.  As can be seen, this did not give any improvement.
+As with task 1, it is seen from the results that combining features (figure \ref{task2complex}) did not really improve the performance.  Firstly, $c,c^2,d,f,h$ gave worse results than all of its constituents' individual results.  As well as this, $f$ and $h$ perform as well individually as when combined together.  The $e,h$ result is worse than the independent results of $h$, though better than both independent results for $e$.  The $g,h$ result is worse than the best independent performances of $g$ and $h$.  $c,c^2,g$ performed poorly.  $a,a^2,c,c^2,e,g$ pretty much matches but does not outperform the best performances of 86\%{} from the previous tests, and this is also true for $a,a^2,c,c^2,g$.
+
+It is interesting to see from these results that the accuracies seem to max out at about 86\%.  From looking at the actual classifications given by the higher-performing functions I have found that this actually occurs when every row of data is predicted as being in class 0.  Some of the functions giving lower accuracies give classification distributions that appear more realistic, but since the evaluated accuracies are lower we must assume that it is the wrong data rows which are being predicted as classes other than 0.  Therefore, I am lead to conclude that the best policy found from these experiments is to predict all data rows as being in class 0.  These experiments have not been totally comprehensive, however, so it is possible that a function might exist that can achieve a better accuracy (either by including higher polynomials or different combinations of features, or both).
 
 \subsection{Task 3}
 
@@ -251,7 +256,7 @@ We can see that, of the 9 instantiations that satisfy $6=1$, 5 also satisfy $7=1
 
 \subsection{Task 5 Question 2}
 
-\textbf{I have yet to answer this question.}
+\todo[inline]{I have yet to answer this question.}
 
 \subsection{Task 5 Question 3}
 
