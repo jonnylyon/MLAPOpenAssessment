@@ -1,7 +1,7 @@
 from reglogistic import reglogistic
 import os
 
-features = ['e','f','g','h']
+features = ['h']
 
 fp = os.path.join(os.path.dirname(__file__), 'stock_price.csv')
 
