@@ -78,9 +78,23 @@ def append_features(source_data):
     return result_data
 
 def split_data(all_data):
+    """ Splits the data into two random folds of approximately equal size
+    """
+    
     shuffle(all_data)
     split = int(len(all_data)/2)
     return [all_data[:split], all_data[split:]]
+
+def split_data_3_folds(all_data):
+    """ Splits the data into three random folds containing approximately
+        2/5, 2/5 and 1/5 of the data
+    """
+    
+    shuffle(all_data)
+    split_1 = int(2 * len(all_data)/5)
+    split_2 = 2 * split_1
+    
+    return [all_data[:split_1], all_data[split_1:split_2], all_data[split_2:]]
     
 def normalise(data):
     all_sv = [row[0] for row in data]

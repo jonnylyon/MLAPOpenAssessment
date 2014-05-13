@@ -5,7 +5,7 @@
 \usepackage{listings}
 \usepackage[colorinlistoftodos]{todonotes}
 
-\title{MLAP Open Assessment A}
+\title{MLAP Open Assessment}
 \author{Y6186228}
 \date{14th May 2014}
 
@@ -30,7 +30,9 @@
 \maketitle
 
 \section{Linear regression and Logistic regression}
+\label{s1}
 \subsection{Task 1}
+\label{s11}
 In order to experiment with linear regression I have chosen to use the following 8 features, referred to in equations as $a$ through $h$ for brevity:\\
 
 \begin{tabular}{l l}
@@ -48,7 +50,9 @@ Further, the elements of a vector $\theta$ represent the coefficients of a regre
 
 \[ \foc{a}{a^2}{b} \]
 
-Figure \ref{task1onetwoorder} shows the Mean Squared Errors (MSEs) obtained in my initial phase of experimentation with the chosen features, shown to three significant figures.  In this phase of experimentation, I evaluated the performance of each feature used on its own in first- and second-order polynomials.
+$a$ is chosen because, combined with $b$, it gives an indication of the general direction and magnitude of the stock volumes in the past two days.  However, it is only a very small amount of data, and likely to give erroneous predictions.  $c$ is included as it could give an indication of whether or not $a$ is anomalously low or high in the context of recent data.  $d$ allows an insight into the volatility of stock volumes over recent days, which may assist in determining the likelihood of a particularly low or high estimate for the next day.  These features are expected to be indirectly useful as they suggest the stock volume, which in turn helps to suggest a stock price (assuming that stock volume and stock price have some form of correlation).  Features $e$, $f$, $g$ and $h$ are analogous to features $a$, $b$, $c$ and $d$ but they are applied to the stock price data rather than the stock volume data.
+
+Figure \ref{task1onetwoorder} shows the Mean Squared Errors (MSEs) obtained in my initial phase of experimentation with the chosen features, shown to three significant figures.  In this phase of experimentation, I evaluated the performance of each feature used on its own in first- and second-order polynomials.  In order to improve the reliability of the results (since the data folds are chosen at random) each evaluation is performed three times.  The average of the three results is presented in this report.  All evaluations in section \ref{s1} of this report are performed and presented in this manner.
 
 \begin{figure}
 \centering
@@ -200,6 +204,84 @@ As with task 1, it is seen from the results that combining features (figure \ref
 It is interesting to see from these results that the accuracies seem to max out at about 86\%.  From looking at the actual classifications given by the higher-performing functions I have found that this actually occurs when every row of data is predicted as being in class 0.  Some of the functions giving lower accuracies give classification distributions that appear more realistic, but since the evaluated accuracies are lower we must assume that it is the wrong data rows which are being predicted as classes other than 0.  Therefore, I am lead to conclude that the best policy found from these experiments is to predict all data rows as being in class 0.  These experiments have not been totally comprehensive, however, so it is possible that a function might exist that can achieve a better accuracy (either by including higher polynomials or different combinations of features, or both).
 
 \subsection{Task 3}
+
+\subsubsection{Regularised Linear Regression}
+
+For this section I have chosen to evaluate the performance of some of the same functions when regularisation is used (results in figure \ref{task3reglinear}).  In each case, I show the lambda that was found to be best in training, and the MSE obtained on the test data.  Green bars represent functions that performed better under regularised linear regression and red bars represent those that performed worse.  The values of $\lambda$ tested were in the range $[0,1]$, at increments of 0.01.
+
+\begin{figure}
+\centering
+\begin{bchart}[step=20,max=100]
+	\bcbar[color=red, label={\fa{a} ($\lambda = 0.99$)}]{48.3}
+		\smallskip
+	\bcbar[color=green, label={\fa{b} ($\lambda = 0.01$)}]{67.9}
+		\smallskip
+	\bcbar[color=green, label={\fa{c} ($\lambda = 0.99$)}]{34.8}
+		\smallskip
+	\bcbar[color=red, label={\fa{d} ($\lambda = 0.99$)}]{53.7}
+		\smallskip
+	\bcbar[color=green, label={\fa{e} ($\lambda = 0.99$)}]{0.532}
+		\smallskip
+	\bcbar[color=red, label={\fa{f} ($\lambda = 0.01$)}]{87.7}
+		\smallskip
+	\bcbar[color=red, label={\fa{g} ($\lambda = 0.99$)}]{44.2}
+		\smallskip
+	\bcbar[color=red, label={\fa{h} ($\lambda = 0.01$)}]{48.8}
+		\smallskip
+	\bcbar[color=red, label={\fb{e}{e^2} ($\lambda = 0.10$)}]{0.585}
+		\smallskip
+	\bcbar[color=green, label={\fb{f}{f^2} ($\lambda = 0.01$)}]{48.2}
+		\smallskip
+	\bcbar[color=green, label={\fb{g}{g^2} ($\lambda = 0.04$)}]{0.927}
+		\smallskip
+	\bcbar[color=red, label={\fb{h}{h^2} ($\lambda = 0.04$)}]{24.3}
+		\smallskip
+	\bcbar[color=red, label={\fd{e}{e^2}{g}{g^2} ($\lambda = 0.08$)}]{0.423}
+		\smallskip
+	\bcbar[color=green, label={\fe{a}{b}{d}{g}{g^2} ($\lambda = 0.04$)}]{1.34}
+\end{bchart}
+\caption{MSEs obtained when using \textit{regularised} linear regression.  Green bars show improvements over unregularised linear regression, and red bars show deterioration.}
+\label{task3reglinear}
+\end{figure}
+
+From the results we can see that the regularised linear regression was not generally worse or better than the unregularised version.  In some cases, there were vastly different results -- for example, \fa{e} performed textit{much} better under the regularised version.  It is unclear why such a big difference should be found when the $\lambda$ used is 0.99.  It is possible that these differences are only caused by the statistical variation which comes about due to the randomly split data folds.  However, an attempt was made to minimise this effect by performing each evaluation three times and reporting the average (as discussed in subsection \ref{s11}).
+
+\subsubsection{Regularised Logistic Regression}
+
+Again, I evaluate the performance of some of the combinations of features when using regularised logistic regression (results in figure \ref{task3reglogistic}).  Again, green bars are those which show improvements when compared to the results for the same features from task 2.  This time, the values of $\lambda$ used were only at increments of 0.1, as the time taken to perform logistic regression is much more significant than the time taken for linear regression.
+
+\begin{figure}
+\centering
+\begin{bchart}[step=20,max=100]
+	\bcbar[color=green, label={$a$ ($\lambda = 0.1$)}]{85.6}
+		\smallskip
+	\bcbar[color=green, label={$b$ ($\lambda = 0.1$)}]{87.2}
+		\smallskip
+	\bcbar[color=green, label={$c$ ($\lambda = 0.1$)}]{85.8}
+		\smallskip
+	\bcbar[color=red, label={$d$ ($\lambda = 0.1$)}]{85.6}
+		\smallskip
+	\bcbar[color=green, label={$e$ ($\lambda = 0.1$)}]{87.2}
+		\smallskip
+	\bcbar[color=red, label={$f$ ($\lambda = 0.4$)}]{85.0}
+		\smallskip
+	\bcbar[color=green, label={$g$ ($\lambda = 0.2$)}]{86.2}
+		\smallskip
+	\bcbar[color=red, label={$h$ ($\lambda = 0.6$)}]{85.6}
+		\smallskip
+	\bcbar[color=green, label={$e,e^2$ ($\lambda = 0.1$)}]{87.6}
+		\smallskip
+	\bcbar[color=red, label={$f,f^2$ ($\lambda = 0.2$)}]{77.9}
+		\smallskip
+	\bcbar[color=green, label={$g,g^2$ ($\lambda = 0.4$)}]{86.4}
+		\smallskip
+	\bcbar[label={$h,h^2$ ($\lambda =$)}]{10}
+\end{bchart}
+\caption{\% accuracies obtained when using \textit{regularised} logistic regression.  Green bars show improvements over unregularised logistic regression, and red bars show deterioration.}
+\label{task3reglogistic}
+\end{figure}
+
+From the results we can see that regularised logistic regression gives very high accuracies.  Almost all of the features give scores of around 87\% when used independently.  The exact value of the 87\%{} scores is not totally consistent.  This is likely to be because the folds do not always contain exactly the same data points, and so the accuracy obtained by always classifying rows as class 0 is not totally consistent.  It is also possible that on some occasions the theta values obtained from the regression do not quite assign everything to class 0, which potentially explains the lower score for $f,f^2$.
 
 \section{Bayesian networks}
 

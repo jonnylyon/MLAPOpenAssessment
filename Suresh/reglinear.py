@@ -1,9 +1,10 @@
+from __future__ import division
 import os
 
 import numpy as np
 import scipy as sp
 
-from generics import FeatureExpander, append_features, split_data, normalise, write_to_file, load_data, sign
+from generics import FeatureExpander, append_features, split_data_3_folds, normalise, write_to_file, load_data, sign
 from datetime import datetime
 from numpy import matrix, dot, ndarray, nditer, transpose
 from scipy.optimize import fmin_bfgs
@@ -56,60 +57,58 @@ def regression(data, lamb):
     return fmin_bfgs(reg_loss_lasso, initial_THETA, fprime=gradient_lasso, args=[data,lamb,sign])
 
 def evaluate(data_CV1, data_CV2, THETA_CV1, THETA_CV2):
-    squared_losses_CV1 = generate_squared_losses(THETA_CV2, data_CV1)
-    squared_losses_CV2 = generate_squared_losses(THETA_CV1, data_CV2)
+    mse_CV1 = calc_mse(THETA_CV2, data_CV1)
+    mse_CV2 = calc_mse(THETA_CV1, data_CV2)
     
-    total_squared_loss = sum(squared_losses_CV1) + sum(squared_losses_CV2)
-    data_quantity = len(squared_losses_CV1) + len(squared_losses_CV2)
+    return (mse_CV1 + mse_CV2) / 2
     
-    return total_squared_loss / data_quantity
-# def evaluate(data_CV1, data_CV2, THETA_CV1, THETA_CV2, lamb):
-    # loss_CV1 = reg_loss_lasso(THETA_CV2, data_CV1, lamb)
-    # loss_CV2 = reg_loss_lasso(THETA_CV1, data_CV2, lamb)
-
-    # return (loss_CV1 + loss_CV2) / 2
+def calc_mse(data, THETA):
+    squared_losses = generate_squared_losses(THETA, data)
+    return sum(squared_losses) / len(squared_losses)
         
-def reglinear(InputFileName):
+def reglinear(InputFileName, inclusion_list = None):
     raw_data = load_data(InputFileName)
     
-    #all_normalised_data = normalise(raw_data)
-    all_normalised_data = raw_data
-    
-    training_data = append_features(all_normalised_data)
+    training_data = append_features(raw_data)
         
     expander = FeatureExpander(training_data)
     
-    inclusion_list = []
-    inclusion_list.append(0) # last sv
-    inclusion_list.append(1) # last change in sv
-    inclusion_list.append(0) # mean of prev 10 rows sv
-    inclusion_list.append(0) # std dev of prev 10 rows sv
-    inclusion_list.append(0) # last sp
-    inclusion_list.append(0) # last change in sp
-    inclusion_list.append(0) # mean of prev 10 rows sp
-    inclusion_list.append(0) # std dev of prev 10 rows sp
+    if not inclusion_list:
+        inclusion_list = []
+        inclusion_list.append(1) # last sv
+        inclusion_list.append(1) # last change in sv
+        inclusion_list.append(0) # mean of prev 10 rows sv
+        inclusion_list.append(1) # std dev of prev 10 rows sv
+        inclusion_list.append(0) # last sp
+        inclusion_list.append(0) # last change in sp
+        inclusion_list.append(2) # mean of prev 10 rows sp
+        inclusion_list.append(0) # std dev of prev 10 rows sp
     
     expanded = expander.expand_features(inclusion_list)
     
     write_to_file(expanded, fp_out)
     
-    [expanded_CV1, expanded_CV2] = split_data(expanded)
+    [expanded_CV1, expanded_CV2, expanded_test] = split_data_3_folds(expanded)
     
     results = []
-    for i in range(101):
-        print i
-        lamb = i * 0.01
+    
+    lamb_resolution = 100
+    for lamb in [i/lamb_resolution for i in range(1,lamb_resolution)]:
+        print lamb
         THETA_CV1 = regression(expanded_CV1, lamb)
         THETA_CV2 = regression(expanded_CV2, lamb)
         
-        results.append(evaluate(expanded_CV1,expanded_CV2,THETA_CV1,THETA_CV2))
+        results.append((THETA_CV1, lamb, calc_mse(expanded_CV2, THETA_CV1)))
+        results.append((THETA_CV2, lamb, calc_mse(expanded_CV1, THETA_CV2)))
     
+    best_result = results[0]
     for result in results:
-        print result
+        if result[2] < best_result[2]:
+            best_result = result
     
-    best_result = min(results)
+    final_score = calc_mse(expanded_test, best_result[0])
     
-    return (results.index(best_result) * 0.01, best_result)
+    return (best_result, final_score)
     
 if __name__ == "__main__":
     print datetime.now()

@@ -5,7 +5,7 @@ import os
 import numpy as np
 import scipy as sp
 
-from generics import FeatureExpander, append_features, split_data, normalise, write_to_file, load_data, sign
+from generics import FeatureExpander, append_features, split_data_3_folds, normalise, write_to_file, load_data, sign
 from datetime import datetime
 from numpy import matrix, reshape, multiply, dot, nditer, transpose
 from sys import float_info
@@ -158,57 +158,53 @@ def evaluate(data_CV1, data_CV2, THETA_CV1, THETA_CV2):
     
     return (pc_CV1 + pc_CV2) / 2
             
-def logistic(InputFileName):
+def reglogistic(InputFileName, inclusion_list = None):
     raw_data = load_data(InputFileName)
     
     all_normalised_data = append_classifications(raw_data)
-    #all_normalised_data = normalise(all_normalised_data)
-    all_normalised_data = all_normalised_data
+    all_normalised_data = normalise(all_normalised_data)
+    #all_normalised_data = all_normalised_data
     training_data = append_features(all_normalised_data)
     expander = FeatureExpander(training_data)
     
-    inclusion_list = []
-    inclusion_list.append(0) # last sv
-    inclusion_list.append(0) # last change in sv
-    inclusion_list.append(0) # mean of prev 10 rows sv
-    inclusion_list.append(0) # std dev of prev 10 rows sv
-    inclusion_list.append(0) # last sp
-    inclusion_list.append(1) # last change in sp
-    inclusion_list.append(0) # mean of prev 10 rows sp
-    inclusion_list.append(0) # std dev of prev 10 rows sp
+    if not inclusion_list:
+        inclusion_list = []
+        inclusion_list.append(0) # last sv
+        inclusion_list.append(0) # last change in sv
+        inclusion_list.append(0) # mean of prev 10 rows sv
+        inclusion_list.append(0) # std dev of prev 10 rows sv
+        inclusion_list.append(0) # last sp
+        inclusion_list.append(1) # last change in sp
+        inclusion_list.append(0) # mean of prev 10 rows sp
+        inclusion_list.append(0) # std dev of prev 10 rows sp
     
     expanded = expander.expand_features(inclusion_list)
     
     write_to_file(expanded, fp_out)
     
-    [expanded_CV1, expanded_CV2] = split_data(expanded)
+    [expanded_CV1, expanded_CV2, expanded_test] = split_data_3_folds(expanded)
     
     results = []
-    #for i in range(1,101):
-    for i in range(1,10):
-        print i
-        lamb = i * 0.1
-        THETA_CV1 = regression(expanded_CV1, lamb)
-        THETA_CV2 = regression(expanded_CV2, lamb)
+    
+    lamb_resolution = 5
+    for lamb in [i/lamb_resolution for i in range(1,lamb_resolution)]:
+        print lamb
+        THETA_CV1 = unflatten_theta(regression(expanded_CV1, lamb))
+        THETA_CV2 = unflatten_theta(regression(expanded_CV2, lamb))
         
-        results.append(evaluate(expanded_CV1,expanded_CV2,THETA_CV1,THETA_CV2))
-    
+        results.append((THETA_CV1, lamb, percentage_correct_classifications(THETA_CV1, expanded_CV2)))
+        results.append((THETA_CV2, lamb, percentage_correct_classifications(THETA_CV2, expanded_CV1)))
+        
+    best_result = results[0]
     for result in results:
-        print result
+        if result[2] > best_result[2]:
+            best_result = result
+            
+    final_score = percentage_correct_classifications(best_result[0], expanded_test)
     
-    best_result = max(results)
-    
-    return (results.index(best_result) * 0.1, best_result)
-    
-    # lamb = 0.5
-    # THETA_CV1 = regression(expanded_CV1, lamb)
-    # THETA_CV2 = regression(expanded_CV2, lamb)
-    
-    # print THETA_CV1
-    # print THETA_CV2
-    # return evaluate(expanded_CV1,expanded_CV2,THETA_CV1,THETA_CV2)
+    return (best_result, final_score)
 
 if __name__ == "__main__":
     print datetime.now()
-    print logistic(fp)
+    print reglogistic(fp)
     print datetime.now()
