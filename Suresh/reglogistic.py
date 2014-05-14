@@ -176,7 +176,7 @@ def reglogistic(InputFileName, inclusion_list = None):
         inclusion_list.append(0) # last sp
         inclusion_list.append(1) # last change in sp
         inclusion_list.append(0) # mean of prev 10 rows sp
-        inclusion_list.append(0) # std dev of prev 10 rows sp
+        inclusion_list.append(1) # std dev of prev 10 rows sp
     
     expanded = expander.expand_features(inclusion_list)
     

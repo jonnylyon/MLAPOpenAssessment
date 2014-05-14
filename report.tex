@@ -275,13 +275,27 @@ Again, I evaluate the performance of some of the combinations of features when u
 		\smallskip
 	\bcbar[color=green, label={$g,g^2$ ($\lambda = 0.4$)}]{86.4}
 		\smallskip
-	\bcbar[label={$h,h^2$ ($\lambda =$)}]{10}
+	\bcbar[color=red, label={$h,h^2$ ($\lambda = 0.8$)}]{82.3}
+		\smallskip
+	\bcbar[color=green, label={$c,c^2,d,f,h$ ($\lambda = 0.8$)}]{65.0}
+		\smallskip
+	\bcbar[color=, label={$f,h$ ($\lambda = $)}]{}
+		\smallskip
+	\bcbar[color=, label={$e,h$ ($\lambda = $)}]{}
+		\smallskip
+	\bcbar[color=, label={$g,h$ ($\lambda = $)}]{}
+		\smallskip
+	\bcbar[color=, label={$c,c^2,g$ ($\lambda = $)}]{}
+		\smallskip
+	\bcbar[color=, label={$a,a^2,c,c^2,e,g$ ($\lambda = $)}]{}
+		\smallskip
+	\bcbar[color=, label={$a,a^2,c,c^2,g$ ($\lambda = $)}]{}
 \end{bchart}
 \caption{\% accuracies obtained when using \textit{regularised} logistic regression.  Green bars show improvements over unregularised logistic regression, and red bars show deterioration.}
 \label{task3reglogistic}
 \end{figure}
 
-From the results we can see that regularised logistic regression gives very high accuracies.  Almost all of the features give scores of around 87\% when used independently.  The exact value of the 87\%{} scores is not totally consistent.  This is likely to be because the folds do not always contain exactly the same data points, and so the accuracy obtained by always classifying rows as class 0 is not totally consistent.  It is also possible that on some occasions the theta values obtained from the regression do not quite assign everything to class 0, which potentially explains the lower score for $f,f^2$.
+From the results we can see that regularised logistic regression gives very high accuracies.  Almost all of the features give scores of around 87\% when used independently.  The exact value of the 87\%{} scores is not totally consistent.  This is likely to be because the folds do not always contain exactly the same data points, and so the accuracy obtained by always classifying rows as class 0 is not totally consistent.  It is also possible that on some occasions the theta values obtained from the regression do not quite assign everything to class 0, which potentially explains the lower scores for $f,f^2$ and $h,h^2$.
 
 \section{Bayesian networks}
 
