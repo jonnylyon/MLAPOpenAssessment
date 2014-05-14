@@ -279,17 +279,17 @@ Again, I evaluate the performance of some of the combinations of features when u
 		\smallskip
 	\bcbar[color=green, label={$c,c^2,d,f,h$ ($\lambda = 0.8$)}]{65.0}
 		\smallskip
-	\bcbar[color=, label={$f,h$ ($\lambda = $)}]{}
-		\smallskip
-	\bcbar[color=, label={$e,h$ ($\lambda = $)}]{}
-		\smallskip
-	\bcbar[color=, label={$g,h$ ($\lambda = $)}]{}
-		\smallskip
-	\bcbar[color=, label={$c,c^2,g$ ($\lambda = $)}]{}
-		\smallskip
-	\bcbar[color=, label={$a,a^2,c,c^2,e,g$ ($\lambda = $)}]{}
-		\smallskip
-	\bcbar[color=, label={$a,a^2,c,c^2,g$ ($\lambda = $)}]{}
+	%\bcbar[color=, label={$f,h$ ($\lambda = $)}]{}
+	%	\smallskip
+	%\bcbar[color=, label={$e,h$ ($\lambda = $)}]{}
+	%	\smallskip
+	%\bcbar[color=, label={$g,h$ ($\lambda = $)}]{}
+	%	\smallskip
+	%\bcbar[color=, label={$c,c^2,g$ ($\lambda = $)}]{}
+	%	\smallskip
+	%\bcbar[color=, label={$a,a^2,c,c^2,e,g$ ($\lambda = $)}]{}
+	%	\smallskip
+	%\bcbar[color=, label={$a,a^2,c,c^2,g$ ($\lambda = $)}]{}
 \end{bchart}
 \caption{\% accuracies obtained when using \textit{regularised} logistic regression.  Green bars show improvements over unregularised logistic regression, and red bars show deterioration.}
 \label{task3reglogistic}
@@ -300,6 +300,14 @@ From the results we can see that regularised logistic regression gives very high
 \section{Bayesian networks}
 
 \subsection{Task 5 Question 1}
+
+If the conditional probability to be estimated is one of the ones that is a direct part of the bayesian network (i.e. the probability of a node being true given the values of its parent nodes), then it could be estimated by simply running the sample through the bnbayesfit function, using the same graph structure file but using the sample as the data file.  However, this requires that the conditional probability being calculated is exactly of the form $P(onechild|allparents)$.  It does not allow you to calculate any of the following:
+\begin{itemize}
+	\item the probability of \textit{multiple} nodes being in some state, i.e. $P(0=1\wedge{}2=0|conditions)$
+	\item the probability of a node where the conditions do not include all of the parents
+	\item the probability of a node where the conditions include a node which is \textit{not} one of the parents
+\end{itemize}
+In order to estimate these probabilities the bnbayesfit method is not sufficient.  Therefore we must use another method, which I describe below.
 
 A conditional probability $P(A|B)$ could be estimated by selecting all of the instantiations that satisfy the condition $B$ and calculating the proportion of those for which $A$ is true.
 
