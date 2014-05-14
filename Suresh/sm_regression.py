@@ -22,14 +22,14 @@ import csv
 # power.  Features left as 0 will not be included at all.  The constant
 # term is always included.
 inclusion_list = []
-inclusion_list.append(0) # last sv
-inclusion_list.append(0) # last change in sv
-inclusion_list.append(0) # mean of prev 10 rows sv
-inclusion_list.append(0) # std dev of prev 10 rows sv
-inclusion_list.append(1) # last sp
-inclusion_list.append(0) # last change in sp
-inclusion_list.append(0) # mean of prev 10 rows sp
-inclusion_list.append(0) # std dev of prev 10 rows sp
+inclusion_list.append(0) # last stock volume
+inclusion_list.append(0) # last change in stock volume
+inclusion_list.append(0) # mean of prev 10 rows stock volume
+inclusion_list.append(0) # std dev of prev 10 rows stock volume
+inclusion_list.append(0) # last stock price
+inclusion_list.append(0) # last change in stock price
+inclusion_list.append(1) # mean of prev 10 rows stock price
+inclusion_list.append(1) # std dev of prev 10 rows stock price
 
 # This is an arbitrary output file, for troubleshoot purposes
 fp_out = os.path.join(os.path.dirname(__file__), 'stock_price_mod.csv')
@@ -761,7 +761,7 @@ def reglogistic(InputFileName):
     
     results = []
     
-    lamb_resolution = 5 # How many lambdas to try (i.e. 100 means increments of 0.01)
+    lamb_resolution = 10 # How many lambdas to try (i.e. 100 means increments of 0.01)
     # for each lambda...
     for lamb in [i/lamb_resolution for i in range(1,lamb_resolution)]:
         print "Currently working on lambda:",lamb # for info

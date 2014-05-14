@@ -65,7 +65,7 @@ Figure \ref{task1onetwoorder} shows the Mean Squared Errors (MSEs) obtained in m
 		\smallskip
 	\bcbar[label={\fa{d}}]{49.8}
 		\smallskip
-	\bcbar[label={\fa{e}}]{49.9}
+	\bcbar[label={\fa{e}}]{0.499}
 		\smallskip
 	\bcbar[label={\fa{f}}]{70.2}
 		\smallskip
@@ -93,7 +93,7 @@ Figure \ref{task1onetwoorder} shows the Mean Squared Errors (MSEs) obtained in m
 \label{task1onetwoorder}
 \end{figure}
 
-It is clear from these results that the best performances come when using the features that relate to stock price as opposed to stock value ($e$ -- $h$).  However, feature $f$, the difference between the last two days' stock prices does not appear to perform very well.  Feature $e$ does not perform well as a first-order polynomial, but is exceptionally good as a second-order polynomial.
+It is clear from these results that the best performances come when using the features that relate to stock price as opposed to stock value ($e$ -- $h$).  However, feature $f$, the difference between the last two days' stock prices does not appear to perform very well.  Features $e$ and $g$ perform exceptionally well both as first- and second-order polynomials.
 
 My next phase of experimentation is to take the high-performing features and try using them on their own in third-order polynomial functions.  Following this, I will experiment with combining the better performing features to see what improvements can be made.  The results of the initial third-order polynomial experiments are shown in figure \ref{task1threeorder}.  Out of interest, I have chosen to try feature $c$ as a third-order polynomial as it was the best performing of the stock volume-related features.
 
@@ -207,7 +207,7 @@ It is interesting to see from these results that the accuracies seem to max out 
 
 \subsubsection{Regularised Linear Regression}
 
-For this section I have chosen to evaluate the performance of some of the same functions when regularisation is used (results in figure \ref{task3reglinear}).  In each case, I show the lambda that was found to be best in training, and the MSE obtained on the test data.  Green bars represent functions that performed better under regularised linear regression and red bars represent those that performed worse.  The values of $\lambda$ tested were in the range $[0,1]$, at increments of 0.01.
+For this section I have chosen to evaluate the performance of some of the same functions when regularisation is used (results in figure \ref{task3reglinear}).  In each case, I show the $\lambda$ that was found to be best in training, and the MSE obtained on the test data.  Green bars represent functions that performed better under regularised linear regression and red bars represent those that performed worse.  The values of $\lambda$ tested were in the range $[0,1]$, at increments of 0.01.
 
 \begin{figure}
 \centering
@@ -220,7 +220,7 @@ For this section I have chosen to evaluate the performance of some of the same f
 		\smallskip
 	\bcbar[color=red, label={\fa{d} ($\lambda = 0.99$)}]{53.7}
 		\smallskip
-	\bcbar[color=green, label={\fa{e} ($\lambda = 0.99$)}]{0.532}
+	\bcbar[color=red, label={\fa{e} ($\lambda = 0.99$)}]{0.532}
 		\smallskip
 	\bcbar[color=red, label={\fa{f} ($\lambda = 0.01$)}]{87.7}
 		\smallskip
@@ -244,7 +244,7 @@ For this section I have chosen to evaluate the performance of some of the same f
 \label{task3reglinear}
 \end{figure}
 
-From the results we can see that the regularised linear regression was not generally worse or better than the unregularised version.  In some cases, there were vastly different results -- for example, \fa{e} performed textit{much} better under the regularised version.  It is unclear why such a big difference should be found when the $\lambda$ used is 0.99.  It is possible that these differences are only caused by the statistical variation which comes about due to the randomly split data folds.  However, an attempt was made to minimise this effect by performing each evaluation three times and reporting the average (as discussed in subsection \ref{s11}).
+From the results we can see that the regularised linear regression was not generally worse or better than the unregularised version.  In some cases, there were vastly different results -- for example, \fa{g} performed far worse under the regularised version.  It is unclear why such a big difference should be found when the $\lambda$ used is 0.99.  It is possible that these differences are only caused by the statistical variation which comes about due to the randomly split data folds.  However, an attempt was made to minimise this effect by performing each evaluation three times and reporting the average (as discussed in subsection \ref{s11}).
 
 \subsubsection{Regularised Logistic Regression}
 
@@ -278,18 +278,16 @@ Again, I evaluate the performance of some of the combinations of features when u
 	\bcbar[color=red, label={$h,h^2$ ($\lambda = 0.8$)}]{82.3}
 		\smallskip
 	\bcbar[color=green, label={$c,c^2,d,f,h$ ($\lambda = 0.8$)}]{65.0}
-		\smallskip
-	%\bcbar[color=, label={$f,h$ ($\lambda = $)}]{}
 	%	\smallskip
 	%\bcbar[color=, label={$e,h$ ($\lambda = $)}]{}
 	%	\smallskip
 	%\bcbar[color=, label={$g,h$ ($\lambda = $)}]{}
-	%	\smallskip
-	%\bcbar[color=, label={$c,c^2,g$ ($\lambda = $)}]{}
-	%	\smallskip
-	%\bcbar[color=, label={$a,a^2,c,c^2,e,g$ ($\lambda = $)}]{}
-	%	\smallskip
-	%\bcbar[color=, label={$a,a^2,c,c^2,g$ ($\lambda = $)}]{}
+		\smallskip
+	\bcbar[color=green, label={$c,c^2,g$ ($\lambda = 0.4$)}]{57.5}
+		\smallskip
+	\bcbar[color=red, label={$a,a^2,c,c^2,e,g$ ($\lambda = 0.6$)}]{84.1}
+		\smallskip
+	\bcbar[color=red, label={$a,a^2,c,c^2,g$ ($\lambda = 0.9$)}]{83.9}
 \end{bchart}
 \caption{\% accuracies obtained when using \textit{regularised} logistic regression.  Green bars show improvements over unregularised logistic regression, and red bars show deterioration.}
 \label{task3reglogistic}
@@ -299,13 +297,42 @@ From the results we can see that regularised logistic regression gives very high
 
 \section{Bayesian networks}
 
-\subsection{Task 5 Question 1}
+\subsection{Task 4}
 
-If the conditional probability to be estimated is one of the ones that is a direct part of the bayesian network (i.e. the probability of a node being true given the values of its parent nodes), then it could be estimated by simply running the sample through the bnbayesfit function, using the same graph structure file but using the sample as the data file.  However, this requires that the conditional probability being calculated is exactly of the form $P(onechild|allparents)$.  It does not allow you to calculate any of the following:
+The following list gives the means of the posterior distributions for each probability (3sf):
+
+\begin{center}
+\begin{tabular}{r c l}
+	$P(0=1|1=0)$					& = & 0.479 \\
+	$P(0=1|1=1)$					& = & 0.936 \\
+	$P(1=1)$						& = & 0.0562 \\
+	$P(2=1|0=0)$					& = & 0.304 \\
+	$P(2=1|0=1)$					& = & 0.610 \\
+	$P(3=1)$						& = & 0.00930 \\
+	$P(4=1|3=0)$					& = & 0.0112 \\
+	$P(4=1|3=1)$					& = & 0.0745 \\
+	$P(5=1|1=0\wedge{}4=1)$			& = & 0.991 \\
+	$P(5=1|1=1\wedge{}4=0)$			& = & 0.998 \\
+	$P(5=1|1=0\wedge{}4=0)$			& = & 0.000107 \\
+	$P(5=1|1=1\wedge{}4=1)$			& = & 0.833 \\
+	$P(6=1|5=0)$					& = & 0.951 \\
+	$P(6=1|5=1)$					& = & 0.0207 \\
+	$P(7=1|2=0\wedge{}5=1)$			& = & 0.701 \\
+	$P(7=1|2=1\wedge{}5=0)$			& = & 0.793 \\
+	$P(7=1|2=0\wedge{}5=0)$			& = & 0.104 \\
+	$P(7=1|2=1\wedge{}5=1)$			& = & 0.922
+\end{tabular}
+\end{center}
+
+\subsection{Task 5}
+\subsubsection{Task 5 Question 1}
+
+If the conditional probability to be estimated is one of the ones that is a direct part of the bayesian network (i.e. the probability of a node being true given the values of its parent nodes), then it could be estimated by simply running the sample through the bnbayesfit function, using the same graph structure file but using the sample as the data file.  However, this does not allow you directly to calculate any of the following:
 \begin{itemize}
-	\item the probability of \textit{multiple} nodes being in some state, i.e. $P(0=1\wedge{}2=0|conditions)$
+	\item the probability of \textit{multiple} nodes being in some state, i.e. $P(3=1\wedge{}5=0|conditions)$
 	\item the probability of a node where the conditions do not include all of the parents
 	\item the probability of a node where the conditions include a node which is \textit{not} one of the parents
+	\item any probability with a disjunction either in the subject or the condition, i.e. ${P(3=1\vee{}5=0|conditions)}$ or ${P(3=1|cond1\vee{}cond2)}$
 \end{itemize}
 In order to estimate these probabilities the bnbayesfit method is not sufficient.  Therefore we must use another method, which I describe below.
 
@@ -358,16 +385,16 @@ From the selection, we find out how many instantiations also have node 7 set to 
 
 We can see that, of the 9 instantiations that satisfy $6=1$, 5 also satisfy $7=1$.  We therefore estimate that $P(7=1|6=1) = \frac{5}{9}$.
 
-\subsection{Task 5 Question 2}
+\subsubsection{Task 5 Question 2}
 
-\todo[inline]{I have yet to answer this question.}
+This procedure is most efficient when the size of the sample is just large enough to give a reliable estimate.  Too large and the extra arithmetic is not worthwhile.  A probability with a rare conditional part requires a larger sample.
 
-\subsection{Task 5 Question 3}
+\subsubsection{Task 5 Question 3}
 
 I will use the same example in this question as in question 1 (find $P(7=1|6=1)$).  From the original data provided in bndata.csv, we know that the probability is $3688 / 8887 = 0.415$ (3dp).  Using the method described above, I will estimate the probability based on 100, 1000, 5000 and 10,000 samples and record them in the table below.  The final column shows the percentage error of the estimation.
 
 \begin{tabular}{l l l l l}
-	Samples		& Number where 6 = 1	& Number where 7 = 1	& Estimated probability (5dp)		& Error (3sf) \\
+	Samples		& Count 6 = 1	& Count 6 = 1 and 7 = 1	& Estimated probability (5dp)		& Error (3sf) \\
 	\hline
 	100		& 87	& 28	& 0.32184		& 22.4 \\
 	1000	& 885	& 360	& 0.40678		& 0.0198 \\
