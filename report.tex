@@ -244,7 +244,7 @@ For this section I have chosen to evaluate the performance of some of the same f
 \label{task3reglinear}
 \end{figure}
 
-From the results we can see that the regularised linear regression was not generally worse or better than the unregularised version.  In some cases, there were vastly different results -- for example, \fa{g} performed far worse under the regularised version.  It is unclear why such a big difference should be found when the $\lambda$ used is 0.99.  It is possible that these differences are only caused by the statistical variation which comes about due to the randomly split data folds.  However, an attempt was made to minimise this effect by performing each evaluation three times and reporting the average (as discussed in subsection \ref{s11}).
+From the results we can see that the regularised linear regression was not generally worse or better than the unregularised version.  In some cases, there were vastly different results -- for example, \fa{g} performed far worse under the regularised version.  It is unclear why such a big difference should be found when the $\lambda$ used is 0.99.  It is possible that these differences are only caused by the statistical variation which comes about due to the randomly split data folds.  However, an attempt was made to minimise this effect by performing each evaluation three times and reporting the average (as discussed in subsection \ref{s11}).  Since regularised linear regression did not improve the results, it may be sensible to suspect that the functions chosen are not on the boundary of overfitting.  In that case, it might have been sensible to consider some higher-order polynomials and/or larger combinations of features in order to find functions with lower errors.
 
 \subsubsection{Regularised Logistic Regression}
 
@@ -278,10 +278,8 @@ Again, I evaluate the performance of some of the combinations of features when u
 	\bcbar[color=red, label={$h,h^2$ ($\lambda = 0.8$)}]{82.3}
 		\smallskip
 	\bcbar[color=green, label={$c,c^2,d,f,h$ ($\lambda = 0.8$)}]{65.0}
-	%	\smallskip
-	%\bcbar[color=, label={$e,h$ ($\lambda = $)}]{}
-	%	\smallskip
-	%\bcbar[color=, label={$g,h$ ($\lambda = $)}]{}
+		\smallskip
+	\bcbar[color=green, label={$e,h$ ($\lambda = 0.4$)}]{72.2}
 		\smallskip
 	\bcbar[color=green, label={$c,c^2,g$ ($\lambda = 0.4$)}]{57.5}
 		\smallskip
@@ -293,7 +291,7 @@ Again, I evaluate the performance of some of the combinations of features when u
 \label{task3reglogistic}
 \end{figure}
 
-From the results we can see that regularised logistic regression gives very high accuracies.  Almost all of the features give scores of around 87\% when used independently.  The exact value of the 87\%{} scores is not totally consistent.  This is likely to be because the folds do not always contain exactly the same data points, and so the accuracy obtained by always classifying rows as class 0 is not totally consistent.  It is also possible that on some occasions the theta values obtained from the regression do not quite assign everything to class 0, which potentially explains the lower scores for $f,f^2$ and $h,h^2$.
+From the results we can see that regularised logistic regression gives very high accuracies.  Almost all of the features give scores of around 87\% when used independently.  The exact value of the 87\%{} scores is not totally consistent.  This is likely to be because the folds do not always contain exactly the same data points, and so the accuracy obtained by always classifying rows as class 0 is not totally consistent.  It is also possible that on some occasions the theta values obtained from the regression do not quite assign everything to class 0, which potentially explains the lower scores for $f,f^2$ and $h,h^2$.  The results for $c,c^2,d,f,h$ were notably low when compared to the other regularised results, as were $e,h$ and $c,c^2,g$.  However, these all gave improvements over the non-regularised versions, particularly $c,c^2,g$.  In some of the cases where $\lambda$ was trained to be quite low (e.g. $e$; $e,e^2$; $c,c^2,g$) we can see vast improvements in the results, particularly for $e,e^2$ whose accuracy rose from 19.5\%{} to 87.6\%{} when regularisation was used.  This is probably because the original non-regularised tests resulted in overfitting, which the regularisation served to reduce.  However, there are some notable cases where $\lambda$ came out very low, but the accuracies increased (e.g. $d$).  The reason for this is unknown.
 
 \section{Bayesian networks}
 
@@ -391,7 +389,7 @@ This procedure is most efficient when the size of the sample is just large enoug
 
 \subsubsection{Task 5 Question 3}
 
-I will use the same example in this question as in question 1 (find $P(7=1|6=1)$).  From the original data provided in bndata.csv, we know that the probability is $3688 / 8887 = 0.415$ (3dp).  Using the method described above, I will estimate the probability based on 100, 1000, 5000 and 10,000 samples and record them in the table below.  The final column shows the percentage error of the estimation.
+I will use the same example in this question as in question 1 (find $P(7=1|6=1)$).  By counting the satisfying rows in the original data provided in bndata.csv, we know that the probability is around $3688 / 8887 = 0.415$ (3dp).  Using the method described above, I will estimate the probability based on 100, 1000, 5000 and 10,000 samples and record them in the table below.  The final column shows the percentage error of the estimation.
 
 \begin{tabular}{l l l l l}
 	Samples		& Count 6 = 1	& Count 6 = 1 and 7 = 1	& Estimated probability (5dp)		& Error (3sf) \\
@@ -403,5 +401,123 @@ I will use the same example in this question as in question 1 (find $P(7=1|6=1)$
 \end{tabular}
 
 Here, the accuracy of the estimation is shown to get gradually better and better as the number of samples increases from 100 to 10,000.
+
+In addition to the figures given above, in figure \ref{bnaccuracygraph} I present a scatter graph of the percentage errors obtained when performing estimates of the same probabilities based on varying sample sizes.  The samples range from 100 to 10,000 (at intervals of 100) and show a clear trend whereby errors decrease as sample size increases.  Note that this data was sampled at a different time to those in the table above, so (due to the randomness involved) the figures do not necessarily match exactly.
+
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\begin{axis}[%
+scatter/classes={%
+    a={mark=*,draw=black}}]
+\addplot[scatter,%
+    scatter src=explicit symbolic]%
+table[] {
+x y
+100 29.3013597131
+200 6.67608115296
+300 0.776764070439
+400 0.658312137375
+500 2.23775783256
+600 3.52279458509
+700 2.89487394893
+800 0.174969008885
+900 0.780511613849
+1000 6.19048494156
+1100 1.13028033785
+1200 9.81796835074
+1300 5.25634019011
+1400 6.72721693772
+1500 2.59018754531
+1600 1.57046855229
+1700 7.6409410799
+1800 2.4646801547
+1900 4.46219854782
+2000 0.990014123847
+2100 0.436491871283
+2200 4.23277221438
+2300 1.76976633768
+2400 5.02050050307
+2500 1.62254311156
+2600 1.0355046136
+2700 2.98972431033
+2800 1.07823342978
+2900 1.90257561533
+3000 2.35604139525
+3100 3.68214719881
+3200 5.75517309107
+3300 0.872668995946
+3400 2.23484131953
+3500 1.97801390009
+3600 1.38630865303
+3700 0.0517417932975
+3800 1.04994335262
+3900 1.72296632755
+4000 0.617362912273
+4100 1.53446302427
+4200 0.116222445673
+4300 0.604327142829
+4400 1.14179455157
+4500 0.147946253785
+4600 1.56366975595
+4700 6.36599396891
+4800 1.54368140572
+4900 0.21574110035
+5000 2.11566487836
+5100 0.800651910707
+5200 0.809479686405
+5300 0.24717805459
+5400 1.27174602113
+5500 0.776764070439
+5600 0.577840181246
+5700 0.287979656993
+5800 1.20676137426
+5900 3.50100736713
+6000 1.39848685013
+6100 2.44465119018
+6200 0.0968642972954
+6300 1.15615611001
+6400 0.594267315013
+6500 0.48763351507
+6600 1.25021699584
+6700 0.669880780466
+6800 3.28359014305
+6900 1.93853609253
+7000 1.52713807636
+7100 1.2264705422
+7200 1.02565219814
+7300 0.00951190134453
+7400 2.81007142746
+7500 0.211735758566
+7600 1.1521013323
+7700 1.17709906972
+7800 0.688109712897
+7900 0.692926056807
+8000 0.381579600993
+8100 0.505005912255
+8200 0.96143234513
+8300 2.13716843493
+8400 1.94914900455
+8500 1.6659943783
+8600 0.663751441059
+8700 0.425134916356
+8800 0.778571612901
+8900 0.642858960127
+9000 1.06156806724
+9100 0.228599207495
+9200 0.62091747438
+9300 0.87585234131
+9400 0.0733068582492
+9500 1.03090642932
+9600 0.572179715452
+9700 0.954462594283
+9800 1.90012539338
+9900 1.7690285939
+    };
+\end{axis}
+\end{tikzpicture}
+\caption{Scatter graph demonstrating the decrease in percentage error based on trials of between 100 and 10,000 samples}
+\label{bnaccuracygraph}
+\end{figure}
 
 \end{document}

@@ -26,9 +26,9 @@ inclusion_list.append(0) # last stock volume
 inclusion_list.append(0) # last change in stock volume
 inclusion_list.append(0) # mean of prev 10 rows stock volume
 inclusion_list.append(0) # std dev of prev 10 rows stock volume
-inclusion_list.append(0) # last stock price
+inclusion_list.append(1) # last stock price
 inclusion_list.append(0) # last change in stock price
-inclusion_list.append(1) # mean of prev 10 rows stock price
+inclusion_list.append(0) # mean of prev 10 rows stock price
 inclusion_list.append(1) # std dev of prev 10 rows stock price
 
 # This is an arbitrary output file, for troubleshoot purposes
